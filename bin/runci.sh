@@ -5,7 +5,7 @@ TEST=${1}
 
 case "$TEST" in
   "scalafmt" )
-    ./scalafmt --test
+    ./bin/scalafmt --test
     ;;
   * )
     sbt $TEST
