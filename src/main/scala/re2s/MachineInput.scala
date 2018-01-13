@@ -188,9 +188,7 @@ object MachineInput {
 
     override def endPos(): Int = end
 
-    private def indexOf(hayStack: CharSequence,
-                        needle: String,
-                        pos: Int): Int =
+    private def indexOf(hayStack: CharSequence, needle: String, pos: Int): Int =
       hayStack match {
         case hayStack: String =>
           hayStack.indexOf(needle, pos)

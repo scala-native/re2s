@@ -121,8 +121,7 @@ object Simplify {
         }
         if (prefixSubs != null) {
           val prefix = new Regexp(ROP.CONCAT)
-          prefix.subs =
-            prefixSubs.toArray(new Array[Regexp](prefixSubs.size()))
+          prefix.subs = prefixSubs.toArray(new Array[Regexp](prefixSubs.size()))
           return prefix
         }
 

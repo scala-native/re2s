@@ -1044,7 +1044,8 @@ class Parser(wholeRegexp: String, _flags: Int) {
   // from the beginning of |t|.  If one is present, it appends the characters
   // to cc and returns true.  The iterator is advanced past the escape
   // on success, undefined on failure, in which case false is returned.
-  private def parsePerlClassEscape(t: StringIterator, cc: CharClass): Boolean = {
+  private def parsePerlClassEscape(t: StringIterator,
+                                   cc: CharClass): Boolean = {
     val beforePos = t.pos()
     if ((flags & RE2.PERL_X) == 0 ||
         !t.more() || t.pop() != '\\' || // consume '\\'
@@ -1132,8 +1133,7 @@ class Parser(wholeRegexp: String, _flags: Int) {
 
     val pair = unicodeTable(name)
     if (pair == null) {
-      throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
-                                       t.from(startPos))
+      throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.from(startPos))
     }
     val tab  = pair.first
     val fold = pair.second // fold-equivalent table

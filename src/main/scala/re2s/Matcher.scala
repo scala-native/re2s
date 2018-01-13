@@ -138,9 +138,9 @@ final class Matcher private (private val _pattern: Pattern) {
     _groups(2 * group + 1)
   }
 
-  def start(name: String): Int = ???
-  def end(name: String): Int = ???
-  def group(name: String): String = ???
+  def start(name: String): Int              = ???
+  def end(name: String): Int                = ???
+  def group(name: String): String           = ???
   def region(start: Int, end: Int): Matcher = ???
 
   /**
@@ -177,8 +177,7 @@ final class Matcher private (private val _pattern: Pattern) {
   /** Helper: finds subgroup information if needed for group. */
   private def loadGroup(group: Int): Unit = {
     if (group < 0 || group > _groupCount) {
-      throw new IndexOutOfBoundsException(
-        "Group index out of bounds: " + group)
+      throw new IndexOutOfBoundsException("Group index out of bounds: " + group)
     }
     if (!_hasMatch) {
       throw new IllegalStateException("perhaps no match attempted")
@@ -260,8 +259,7 @@ final class Matcher private (private val _pattern: Pattern) {
    */
   def find(start: Int): Boolean = {
     if (start < 0 || start > _inputLength) {
-      throw new IndexOutOfBoundsException(
-        "start index out of bounds: " + start)
+      throw new IndexOutOfBoundsException("start index out of bounds: " + start)
     }
     reset()
     genMatch(start, 0)
@@ -387,7 +385,8 @@ final class Matcher private (private val _pattern: Pattern) {
     throw new Exception(
       s"$methodName is not defined since we don't support lookaheads")
 
-  def useTransparentBounds(b: Boolean): Matcher = noLookAhead("useTransparentBounds")
+  def useTransparentBounds(b: Boolean): Matcher =
+    noLookAhead("useTransparentBounds")
   def hasTransparentBounds(): Boolean = noLookAhead("hasTransparentBounds")
 
   /**

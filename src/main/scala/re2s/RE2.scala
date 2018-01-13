@@ -47,9 +47,8 @@ class RE2 private {
   var numSubexp: Int   = _
   var longest: Boolean = _
 
-  var prefix: String = _ // required UTF-16 prefix in unanchored matches
-  var prefixUTF8
-    : Array[Byte]             = _ // required UTF-8 prefix in unanchored matches
+  var prefix: String          = _ // required UTF-16 prefix in unanchored matches
+  var prefixUTF8: Array[Byte] = _ // required UTF-8 prefix in unanchored matches
   var prefixComplete: Boolean = _ // true iff prefix is the entire regexp
   var prefixRune: Int         = _ // first rune in prefix
 

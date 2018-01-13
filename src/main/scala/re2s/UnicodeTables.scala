@@ -13,7 +13,6 @@ object UnicodeTables extends UnicodeTableData {
   final val TitleCase  = 2
   final val UpperLower = 0x110000
 
-  
   private final val _Katakana =
     Array(
       Array(0x30a1, 0x30fa, 1),

@@ -7,7 +7,6 @@ import TestUtils._
 // j2objc: https://github.com/google/j2objc/blob/master/jre_emul/Tests/java/util/regex/MatcherTest.java#L1
 // re2: https://github.com/google/re2/blob/master/re2/testing/re2_test.cc
 
-
 class MatcherSuite() extends FunSuite {
   test("quoteReplacement") {
     assert(Matcher.quoteReplacement("") == "")
@@ -208,8 +207,9 @@ class MatcherSuite() extends FunSuite {
       appendReplacement(buf, "such ${S}, wow ${D}")
     }
     appendTail(buf)
-    assert(buf.toString ==
-                 "such Montreal, Canada, wow Lausanne, Switzerland")
+    assert(
+      buf.toString ==
+        "such Montreal, Canada, wow Lausanne, Switzerland")
   }
 
   test("reset") {
@@ -253,7 +253,7 @@ class MatcherSuite() extends FunSuite {
 
     m2.useTransparentBounds(true)
     assert(m2.matches()) // transparent
-    pending // 620
+    pending              // 620
   }
 
   test("lookingAt") {
@@ -265,7 +265,7 @@ class MatcherSuite() extends FunSuite {
     val p = Pattern.compile("foo")
     assert(
       p.matcher("foobar").pattern() ==
-      p
+        p
     )
   }
 

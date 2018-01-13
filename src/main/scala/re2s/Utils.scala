@@ -121,7 +121,9 @@ object Utils {
 
   // Returns the index of the first occurrence of array |target| within
   // array |source| after |fromIndex|, or -1 if not found.
-  def indexOf(source: Array[Byte], target: Array[Byte], _fromIndex: Int): Int = {
+  def indexOf(source: Array[Byte],
+              target: Array[Byte],
+              _fromIndex: Int): Int = {
     var fromIndex = _fromIndex
     if (fromIndex >= source.length) {
       return (if (target.length == 0) source.length else -1)

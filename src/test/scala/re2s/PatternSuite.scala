@@ -207,7 +207,7 @@ class PatternSuite() extends FunSuite {
 
   test("(not supported) java named groups") {
     pass("(?<foo>a)", "a") // (?<name> to (?P<name>
-    pending // 620
+    pending                // 620
   }
 
   test("re2 named groups") {
