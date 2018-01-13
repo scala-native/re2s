@@ -69,7 +69,7 @@ class MatcherSuite() extends FunSuite {
     )
   }
 
-  test("(Not supported) named group (java syntax)") {
+  ignore("(Not supported) named group (java syntax)") { // 620
     val m = matcher(
       "from (?<S>.*) to (?<D>.*)",
       "from Montreal, Canada to Lausanne, Switzerland"
@@ -79,7 +79,6 @@ class MatcherSuite() extends FunSuite {
     assert(find())
     assert(group("S") == "Montreal, Canada")
     assert(group("D") == "Lausanne, Switzerland")
-    pending // 620
   }
 
   test("start(i)/end(i)") {
@@ -155,7 +154,7 @@ class MatcherSuite() extends FunSuite {
     )
   }
 
-  test("(Not Supported) start(name)/end(name) java syntax") {
+  ignore("(Not Supported) start(name)/end(name) java syntax") { // 620
     // change pattern to java: "from (?<S>.*) to (?<D>.*)"
     val m = matcher(
       "from (?<S>.*) to (?<D>.*)",
@@ -169,7 +168,6 @@ class MatcherSuite() extends FunSuite {
 
     assert(start("D") == 25)
     assert(end("D") == 46)
-    pending // 620
   }
 
   test("appendReplacement/appendTail") {
@@ -234,7 +232,7 @@ class MatcherSuite() extends FunSuite {
   }
 
   // we don't support lookahead
-  test("(Not supported) hasTransparentBounds/useTransparentBounds") {
+  ignore("(Not supported) hasTransparentBounds/useTransparentBounds") {
 
     // ?=  <==>  zero-width positive look-ahead
     val m1 = Pattern.compile("foo(?=buzz)").matcher("foobuzz")

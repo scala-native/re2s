@@ -44,7 +44,7 @@ class PatternSuite() extends FunSuite {
     pass("\\a", "\u0007") // alert (bell)
   }
 
-  test("(not supported) character classes") {
+  ignore("(not supported) character classes") {
     pass("\\0100", "\u0040") // 100 octal = 40 hex
     pass("\\xFF", "\u00FF")
     pass("\\uBEEF", "\uBEEF")
@@ -68,7 +68,7 @@ class PatternSuite() extends FunSuite {
     pass("\\W", "-")
   }
 
-  test("(not supported) POSIX character classes") {
+  ignore("(not supported) POSIX character classes") {
     // Needs to convert to
     pass("\\p{Alnum}", "a")     // [[:alpha:]]
     pass("\\p{Alpha}", "a")     // [[:alnum:]]
@@ -90,7 +90,7 @@ class PatternSuite() extends FunSuite {
     pass("\\p{Sc}", "$")
   }
 
-  test("(not supported) unicode classes") {
+  ignore("(not supported) unicode classes") {
     // Needs to convert to
     pass("\\p{InGreek}", "α") // p{Latin}
     pass("\\p{IsLatin}", "a") // p{Greek}
@@ -110,7 +110,7 @@ class PatternSuite() extends FunSuite {
     pass("foo\\z", "foo")
   }
 
-  test("(Not supported) boundary matchers") {
+  ignore("(Not supported) boundary matchers") {
     // \G = at the end of the previous match
     val m1 = Pattern.compile("\\Gfoo").matcher("foofoo foo")
     assert(m1.find())
@@ -205,7 +205,7 @@ class PatternSuite() extends FunSuite {
     pass("\\Qa|b|c\\E", "a|b|c")
   }
 
-  test("(not supported) java named groups") {
+  ignore("(Not supported) java named groups") {
     pass("(?<foo>a)", "a") // (?<name> to (?P<name>
     pending                // 620
   }
@@ -228,7 +228,7 @@ class PatternSuite() extends FunSuite {
     assert(Pattern.compile(in).toString == in)
   }
 
-  test("(Not supported) character classes (union and intersection)") {
+  ignore("(Not supported) character classes (union and intersection)") {
     pass("[a-d[m-p]]", "acn")
     pass("[[a-z] && [b-y] && [c-x]]", "g")
     pass("[a-z&&[def]]", "e")
@@ -239,7 +239,7 @@ class PatternSuite() extends FunSuite {
     pending // 620
   }
 
-  test("(Not Supported) predefined character classes (horizontal and vertical)") {
+  ignore("(Not Supported) predefined character classes (horizontal and vertical)") {
     pass("\\h", " ")
     pass("\\H", "a")
     pass("\\v", "\n")
@@ -247,7 +247,7 @@ class PatternSuite() extends FunSuite {
     pending // 620
   }
 
-  test("(Not supported)java character function classes") {
+  ignore("(Not supported)java character function classes") {
     pass("\\p{javaLowerCase}", "a")
     pass("\\p{javaUpperCase}", "A")
     pass("\\p{javaWhitespace}", " ")
@@ -261,13 +261,13 @@ class PatternSuite() extends FunSuite {
     https://github.com/google/re2/wiki/WhyRE2
     https://github.com/google/re2/blob/2017-03-01/doc/syntax.txt
    */
-  test("(not supported) back references") {
+  ignore("(Not supported) back references") {
     pass("(a)\\1", "aa")
     pass("(?<foo>a)\\k<foo>", "aa")
     pending // 620
   }
 
-  test("(not supported) lookaheads") {
+  ignore("(Not supported) lookaheads") {
     // positive lookahead
     passAndFail(".*\\.(?=log$).*$", "a.b.c.log", "a.b.c.log.")
 
@@ -292,7 +292,7 @@ class PatternSuite() extends FunSuite {
     pending // 620
   }
 
-  test("(not supported) possessive quantifiers") {
+  ignore("(Not supported) possessive quantifiers") {
     // zero or one, prefer more
     pass("X?+", "")
     pass("X?+", "X")
