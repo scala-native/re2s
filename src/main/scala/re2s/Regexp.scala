@@ -279,6 +279,7 @@ class Regexp private {
             !x.subs(0).equals(y.subs(0))) {
           return false
         }
+      case _ =>
     }
     return true
   }

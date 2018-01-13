@@ -276,6 +276,7 @@ class Parser(wholeRegexp: String, _flags: Int) {
           re.op = ROP.ANY_CHAR_NOT_NL
           return
         }
+      case _ =>
     }
   }
 
