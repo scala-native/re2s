@@ -10,6 +10,7 @@ package re2s
 import java.util.ArrayList
 import java.util.Arrays
 import java.util.List
+import scala.util.control.Breaks._
 
 import Inst.{Op => IOP}
 
@@ -104,16 +105,16 @@ class Machine(re2: RE2) {
     } else {
       flag = in.context(pos)
     }
-    var stop = false
-    while (!stop) {
+    
+    breakable  { while (true) {
       if (runq.isEmpty()) {
         if ((startCond & Utils.EMPTY_BEGIN_TEXT) != 0 && pos != 0) {
           // Anchored match, past beginning of text.
-          stop = true
+          break
         }
         if (matched) {
           // Have match finished exploring alternatives.
-          stop = true
+          break
         }
         if (!re2.prefix.isEmpty() &&
             rune1 != re2.prefixRune &&
@@ -121,7 +122,7 @@ class Machine(re2: RE2) {
           // Match requires literal prefix fast search for it.
           val advance = in.index(re2, pos)
           if (advance < 0) {
-            stop = true
+            break
           }
           pos += advance
           r = in.step(pos)
@@ -150,12 +151,12 @@ class Machine(re2: RE2) {
            anchor,
            pos == in.endPos())
       if (width == 0) { // EOF
-        stop = true
+        break
       }
       if (matchcap.length == 0 && matched) {
         // Found a match and not paying attention
         // to where it is, so any match will do.
-        stop = true
+        break
       }
       pos += width
       rune = rune1
@@ -168,7 +169,7 @@ class Machine(re2: RE2) {
       val tmpq = runq
       runq = nextq
       nextq = tmpq
-    }
+    } }
     nextq.clear(pool)
     matched
   }
