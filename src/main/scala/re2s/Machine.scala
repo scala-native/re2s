@@ -105,71 +105,73 @@ class Machine(re2: RE2) {
     } else {
       flag = in.context(pos)
     }
-    
-    breakable  { while (true) {
-      if (runq.isEmpty()) {
-        if ((startCond & Utils.EMPTY_BEGIN_TEXT) != 0 && pos != 0) {
-          // Anchored match, past beginning of text.
-          break
-        }
-        if (matched) {
-          // Have match finished exploring alternatives.
-          break
-        }
-        if (!re2.prefix.isEmpty() &&
-            rune1 != re2.prefixRune &&
-            in.canCheckPrefix()) {
-          // Match requires literal prefix fast search for it.
-          val advance = in.index(re2, pos)
-          if (advance < 0) {
+
+    breakable {
+      while (true) {
+        if (runq.isEmpty()) {
+          if ((startCond & Utils.EMPTY_BEGIN_TEXT) != 0 && pos != 0) {
+            // Anchored match, past beginning of text.
             break
           }
-          pos += advance
-          r = in.step(pos)
-          rune = r >> 3
-          width = r & 7
+          if (matched) {
+            // Have match finished exploring alternatives.
+            break
+          }
+          if (!re2.prefix.isEmpty() &&
+              rune1 != re2.prefixRune &&
+              in.canCheckPrefix()) {
+            // Match requires literal prefix fast search for it.
+            val advance = in.index(re2, pos)
+            if (advance < 0) {
+              break
+            }
+            pos += advance
+            r = in.step(pos)
+            rune = r >> 3
+            width = r & 7
+            r = in.step(pos + width)
+            rune1 = r >> 3
+            width1 = r & 7
+          }
+        }
+        if (!matched && (pos == 0 || anchor == RE2.UNANCHORED)) {
+          // If we are anchoring at begin then only add threads that begin
+          // at |pos| = 0.
+          if (matchcap.length > 0) {
+            matchcap(0) = pos
+          }
+          this.add(runq, prog.start, pos, matchcap, flag, null)
+        }
+        flag = Utils.emptyOpContext(rune, rune1)
+        step(runq,
+             nextq,
+             pos,
+             pos + width,
+             rune,
+             flag,
+             anchor,
+             pos == in.endPos())
+        if (width == 0) { // EOF
+          break
+        }
+        if (matchcap.length == 0 && matched) {
+          // Found a match and not paying attention
+          // to where it is, so any match will do.
+          break
+        }
+        pos += width
+        rune = rune1
+        width = width1
+        if (rune != -1) {
           r = in.step(pos + width)
           rune1 = r >> 3
           width1 = r & 7
         }
+        val tmpq = runq
+        runq = nextq
+        nextq = tmpq
       }
-      if (!matched && (pos == 0 || anchor == RE2.UNANCHORED)) {
-        // If we are anchoring at begin then only add threads that begin
-        // at |pos| = 0.
-        if (matchcap.length > 0) {
-          matchcap(0) = pos
-        }
-        this.add(runq, prog.start, pos, matchcap, flag, null)
-      }
-      flag = Utils.emptyOpContext(rune, rune1)
-      step(runq,
-           nextq,
-           pos,
-           pos + width,
-           rune,
-           flag,
-           anchor,
-           pos == in.endPos())
-      if (width == 0) { // EOF
-        break
-      }
-      if (matchcap.length == 0 && matched) {
-        // Found a match and not paying attention
-        // to where it is, so any match will do.
-        break
-      }
-      pos += width
-      rune = rune1
-      width = width1
-      if (rune != -1) {
-        r = in.step(pos + width)
-        rune1 = r >> 3
-        width1 = r & 7
-      }
-      val tmpq = runq
-      runq = nextq
-      nextq = tmpq
-    } }
+    }
     nextq.clear(pool)
     matched
   }

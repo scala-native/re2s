@@ -239,7 +239,8 @@ class PatternSuite() extends FunSuite {
     pending // 620
   }
 
-  ignore("(Not Supported) predefined character classes (horizontal and vertical)") {
+  ignore(
+    "(Not Supported) predefined character classes (horizontal and vertical)") {
     pass("\\h", " ")
     pass("\\H", "a")
     pass("\\v", "\n")
