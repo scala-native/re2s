@@ -86,11 +86,11 @@ class MatcherSuite() extends FunSuite {
     import m._
 
     assertThrowsAnd[IllegalStateException](start)(
-      _.getMessage == "No match found"
+      _.getMessage == "No match available"
     )
 
     assertThrowsAnd[IllegalStateException](end)(
-      _.getMessage == "No match found"
+      _.getMessage == "No match available"
     )
 
     assert(find())
@@ -107,12 +107,12 @@ class MatcherSuite() extends FunSuite {
     assert(start(2) == 9)
     assert(end(2) == 10)
 
-    assertThrowsAnd[IndexOutOfBoundsException](start(42))(
-      _.getMessage == "No group 42"
+    assertThrowsAnd[IllegalStateException](start(42))(
+      _.getMessage == "No match available"
     )
 
-    assertThrowsAnd[IndexOutOfBoundsException](end(42))(
-      _.getMessage == "No group 42"
+    assertThrowsAnd[IllegalStateException](end(42))(
+      _.getMessage == "No match available"
     )
   }
 

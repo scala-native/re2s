@@ -120,8 +120,8 @@ final class Matcher private (private val _pattern: Pattern) {
    * @throws IndexOutOfBoundsException
    *   if {@code group < 0} or {@code group > groupCount()}
    */
-  def start(group: Int): Int = {
-    loadGroup(group)
+  def start(group: Int, notGroup: Boolean = true): Int = {
+    loadGroup(group, notGroup)
     _groups(2 * group)
   }
 
@@ -133,8 +133,8 @@ final class Matcher private (private val _pattern: Pattern) {
    * @throws IndexOutOfBoundsException
    *   if {@code group < 0} or {@code group > groupCount()}
    */
-  def end(group: Int): Int = {
-    loadGroup(group)
+  def end(group: Int, notGroup: Boolean = true): Int = {
+    loadGroup(group, notGroup)
     _groups(2 * group + 1)
   }
 
@@ -158,8 +158,8 @@ final class Matcher private (private val _pattern: Pattern) {
    *   or {@code group > groupCount()}
    */
   def group(group: Int): String = {
-    val start = this.start(group)
-    val end   = this.end(group)
+    val start = this.start(group, false)
+    val end   = this.end(group, false)
     if (start < 0 && end < 0) {
       // Means the subpattern didn't get matched at all.
       return null
@@ -175,9 +175,13 @@ final class Matcher private (private val _pattern: Pattern) {
   def groupCount(): Int = _groupCount
 
   /** Helper: finds subgroup information if needed for group. */
-  private def loadGroup(group: Int): Unit = {
+  private def loadGroup(group: Int, notGroup: Boolean): Unit = {
+    println(group, _groupCount, !_hasMatch)
     if (group < 0 || group > _groupCount || !_hasMatch) {
-      throw new IllegalStateException("No match found")
+      if(notGroup)
+        throw new IllegalStateException("No match available")
+      else
+        throw new IllegalStateException("No match found")
     }
     if (group == 0 || _hasGroups) {
       return
