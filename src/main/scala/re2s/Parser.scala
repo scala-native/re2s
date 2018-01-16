@@ -157,7 +157,7 @@ class Parser(wholeRegexp: String, _flags: Int) {
     if ((flags & RE2.FOLD_CASE) != 0) {
       r = minFoldRune(r)
     }
-    re.runes = new Array[Int](r)
+    re.runes = Array[Int](r)
     re
   }
 

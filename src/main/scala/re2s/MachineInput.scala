@@ -161,9 +161,9 @@ object MachineInput {
         val rune    = Character.codePointAt(str, pos)
         val nextPos = pos + Character.charCount(rune)
         val width   = nextPos - pos
-        return rune << 3 | width
+        rune << 3 | width
       } else {
-        return EOF
+        EOF
       }
     }
 
