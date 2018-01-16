@@ -374,24 +374,24 @@ class PatternSuite() extends FunSuite {
   }
 
   test("syntax exceptions") {
-    assertThrowsAnd[PatternSyntaxException](Pattern.compile("foo\\L"))(
+    assertThrowsAnd[re2s.PatternSyntaxException](Pattern.compile("foo\\L"))(
       e => {
         e.getDescription == "Illegal/unsupported escape sequence" &&
-        e.getIndex == 3 &&
+        e.getIndex == 4 &&
         e.getPattern == "foo\\L" &&
         e.getMessage ==
-          """|Illegal/unsupported escape sequence near index 3
+          """|Illegal/unsupported escape sequence near index 4
              |foo\L
-             |   ^""".stripMargin
+             |    ^""".stripMargin
       }
     )
-    syntax("foo\\Lbar", "Illegal/unsupported escape sequence", 3)
-    syntax("foo[bar", "Unclosed character class", 3)
-    syntax("foo\\", "Trailing Backslash", 3)
-    syntax("[a-0]", "Illegal character range", 1)
+    syntax("foo\\Lbar", "Illegal/unsupported escape sequence", 4)
+    syntax("foo[bar", "Unclosed character class", 6)
+    syntax("foo\\", "Unexpected internal error", 4)
+    syntax("[a-0]", "Illegal character range", 3)
     syntax("*", "Dangling meta character '*'", 0)
-    syntax("foo(bar(foo)baz", "Missing parenthesis", 0)
-    syntax("foo(foo)bar)baz", "Missing parenthesis", 0)
+    syntax("foo(bar(foo)baz", "Unclosed group", 15)
+    syntax("foo(foo)bar)baz", "Unmatched closing ')'", 10)
   }
 
   private def syntax(pattern: String, description: String, index: Int): Unit = {
