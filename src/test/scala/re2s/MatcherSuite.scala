@@ -40,8 +40,8 @@ class MatcherSuite() extends FunSuite {
     assert(group(0) == "a12z")
     assert(group(1) == "1")
     assert(group(2) == "2")
-    assertThrowsAnd[IndexOutOfBoundsException](group(42))(
-      _.getMessage == "No group 42"
+    assertThrowsAnd[IllegalStateException](group(42))(
+      _.getMessage == "No match found"
     )
 
     assert(find())

@@ -176,11 +176,8 @@ final class Matcher private (private val _pattern: Pattern) {
 
   /** Helper: finds subgroup information if needed for group. */
   private def loadGroup(group: Int): Unit = {
-    if (group < 0 || group > _groupCount) {
-      throw new IndexOutOfBoundsException("Group index out of bounds: " + group)
-    }
-    if (!_hasMatch) {
-      throw new IllegalStateException("perhaps no match attempted")
+    if (group < 0 || group > _groupCount || !_hasMatch) {
+      throw new IllegalStateException("No match found")
     }
     if (group == 0 || _hasGroups) {
       return
