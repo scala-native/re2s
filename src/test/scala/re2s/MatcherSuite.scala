@@ -53,7 +53,7 @@ class MatcherSuite() extends FunSuite {
     assert(!find())
   }
 
-  test("named group (re2 syntax)") {
+  ignore("(Not supported) named group (re2 syntax)") {
     // change pattern to java: "from (?<S>.*) to (?<D>.*)"
     val m = matcher(
       "from (?P<S>.*) to (?P<D>.*)",
@@ -131,7 +131,7 @@ class MatcherSuite() extends FunSuite {
     assert(!find())
   }
 
-  test("start(name)/end(name) re2 syntax") {
+  ignore("(Not Supported) start(name)/end(name) re2 syntax") {
     val m = matcher(
       "from (?P<S>.*) to (?P<D>.*)",
       "from Montreal, Canada to Lausanne, Switzerland"
@@ -194,7 +194,7 @@ class MatcherSuite() extends FunSuite {
     assert(buf.toString == "_{a12z}_{a34z}_")
   }
 
-  test("appendReplacement/appendTail with group replacement by name") {
+  ignore("(Not Supported) appendReplacement/appendTail with group replacement by name") {
     val buf = new StringBuffer()
     val m = matcher(
       "from (?P<S>.*) to (?P<D>.*)",
