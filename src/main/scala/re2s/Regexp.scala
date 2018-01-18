@@ -15,7 +15,7 @@ import java.util.Arrays
  * NB, this corresponds to {@code syntax.regexp} in the Go implementation
  * Go's {@code regexp} is called {@code RE2} in Java.
  */
-class Regexp private {
+class Regexp {
   import Regexp._
 
   var op: Op              = _ // operator
@@ -100,7 +100,7 @@ class Regexp private {
         }
       case Op.CONCAT =>
         var i = 0
-        while (i <= subs.length) {
+        while (i < subs.length) {
           val sub = subs(i)
           if (sub.op == Op.ALTERNATE) {
             out.append("(?:")
@@ -114,7 +114,7 @@ class Regexp private {
       case Op.ALTERNATE =>
         var sep = ""
         var i   = 0
-        while (i <= subs.length) {
+        while (i < subs.length) {
           val sub = subs(i)
           out.append(sep)
           sep = "|"
@@ -233,57 +233,7 @@ class Regexp private {
     m
   }
 
-  // equals() returns true if this and that have identical structure.
-  override def equals(that: Any): Boolean = {
-    if (!that.isInstanceOf[Regexp]) {
-      return false
-    }
-    val x = this
-    val y = that.asInstanceOf[Regexp]
-    if (x.op != y.op) {
-      return false
-    }
-    (x.op: @scala.annotation.switch) match {
-      case Op.END_TEXT =>
-        // The parse flags remember whether this is \z or \Z.
-        if ((x.flags & RE2.WAS_DOLLAR) != (y.flags & RE2.WAS_DOLLAR)) {
-          return false
-        }
-      case Op.LITERAL | Op.CHAR_CLASS =>
-        if (!Arrays.equals(x.runes, y.runes)) {
-          return false
-        }
-      case Op.ALTERNATE | Op.CONCAT =>
-        if (x.subs.length != y.subs.length) {
-          return false
-        }
-        var i = 0
-        while (i < x.subs.length) {
-          if (!x.subs(i).equals(y.subs(i))) {
-            return false
-          }
-          i += 1
-        }
-      case Op.STAR | Op.PLUS | Op.QUEST =>
-        if ((x.flags & RE2.NON_GREEDY) != (y.flags & RE2.NON_GREEDY) ||
-            !x.subs(0).equals(y.subs(0))) {
-          return false
-        }
-      case Op.REPEAT =>
-        if ((x.flags & RE2.NON_GREEDY) != (y.flags & RE2.NON_GREEDY) ||
-            x.min != y.min || x.max != y.max || !x.subs(0).equals(y.subs(0))) {
-          return false
-        }
-      case Op.CAPTURE =>
-        if (x.cap != y.cap || x.name != y.name ||
-            !x.subs(0).equals(y.subs(0))) {
-          return false
-        }
-      case _ =>
-    }
-    return true
-  }
-
+  // TODO: shallow copy shouldn't match, so removing equals
 }
 
 object Regexp {
