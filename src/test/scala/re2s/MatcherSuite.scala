@@ -40,8 +40,8 @@ class MatcherSuite() extends FunSuite {
     assert(group(0) == "a12z")
     assert(group(1) == "1")
     assert(group(2) == "2")
-    assertThrowsAnd[IndexOutOfBoundsException](group(42))(
-      _.getMessage == "No group 42"
+    assertThrowsAnd[IllegalStateException](group(42))(
+      _.getMessage == "No match found"
     )
 
     assert(find())
@@ -53,7 +53,7 @@ class MatcherSuite() extends FunSuite {
     assert(!find())
   }
 
-  test("named group (re2 syntax)") {
+  ignore("(Not supported) named group (re2 syntax)") {
     // change pattern to java: "from (?<S>.*) to (?<D>.*)"
     val m = matcher(
       "from (?P<S>.*) to (?P<D>.*)",
@@ -86,11 +86,11 @@ class MatcherSuite() extends FunSuite {
     import m._
 
     assertThrowsAnd[IllegalStateException](start)(
-      _.getMessage == "No match found"
+      _.getMessage == "No match available"
     )
 
     assertThrowsAnd[IllegalStateException](end)(
-      _.getMessage == "No match found"
+      _.getMessage == "No match available"
     )
 
     assert(find())
@@ -107,12 +107,12 @@ class MatcherSuite() extends FunSuite {
     assert(start(2) == 9)
     assert(end(2) == 10)
 
-    assertThrowsAnd[IndexOutOfBoundsException](start(42))(
-      _.getMessage == "No group 42"
+    assertThrowsAnd[IllegalStateException](start(42))(
+      _.getMessage == "No match available"
     )
 
-    assertThrowsAnd[IndexOutOfBoundsException](end(42))(
-      _.getMessage == "No group 42"
+    assertThrowsAnd[IllegalStateException](end(42))(
+      _.getMessage == "No match available"
     )
   }
 
@@ -131,7 +131,7 @@ class MatcherSuite() extends FunSuite {
     assert(!find())
   }
 
-  test("start(name)/end(name) re2 syntax") {
+  ignore("(Not Supported) start(name)/end(name) re2 syntax") {
     val m = matcher(
       "from (?P<S>.*) to (?P<D>.*)",
       "from Montreal, Canada to Lausanne, Switzerland"
@@ -194,7 +194,8 @@ class MatcherSuite() extends FunSuite {
     assert(buf.toString == "_{a12z}_{a34z}_")
   }
 
-  test("appendReplacement/appendTail with group replacement by name") {
+  ignore(
+    "(Not Supported) appendReplacement/appendTail with group replacement by name") {
     val buf = new StringBuffer()
     val m = matcher(
       "from (?P<S>.*) to (?P<D>.*)",

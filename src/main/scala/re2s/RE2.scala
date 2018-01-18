@@ -37,7 +37,7 @@ import java.util.List
  * API, and the <a href='package.html'>package-level
  * documentation</a> for an overview of how to use this API.
  */
-class RE2 private {
+class RE2 private extends Serializable {
   import RE2._
 
   var expr: String = _ // as passed to Compile

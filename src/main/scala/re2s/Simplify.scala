@@ -79,7 +79,7 @@ object Simplify {
           }
           subs.add(simplify1(ROP.PLUS, re.flags, sub, null))
           nre.subs = subs.toArray(new Array[Regexp](subs.size()))
-          nre
+          return nre
         }
 
         // Special case x{0} handled above.

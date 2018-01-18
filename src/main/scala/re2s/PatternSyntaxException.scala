@@ -10,10 +10,11 @@ package re2s
  * Following {@code java.util.regex.PatternSyntaxException}, this is an
  * unchecked exception.
  */
-class PatternSyntaxException(error: String, input: String)
+class PatternSyntaxException(error: String, input: String, index: Int)
     extends RuntimeException(
       "error parsing regexp: " + error + ": `" + input + "`") {
-  def this(error: String) = this(error, "")
+  def this(error: String, input: String) = this(error, input, 0)
+  def this(error: String) = this(error, "", 0)
 
   /**
    * Retrieves the error index.
@@ -21,7 +22,7 @@ class PatternSyntaxException(error: String, input: String)
    * @return  The approximate index in the pattern of the error,
    *         or <tt>-1</tt> if the index is not known
    */
-  def getIndex(): Int = -1
+  def getIndex(): Int = index
 
   /**
    * Retrieves the description of the error.
@@ -30,7 +31,11 @@ class PatternSyntaxException(error: String, input: String)
    */
   def getDescription(): String = error
 
-  override def getMessage(): String = error
+  override def getMessage(): String = {
+    s"""$error near index $index
+       |$getPattern
+       |${" " * getIndex() + "^"}""".stripMargin
+  }
 
   /**
    * Retrieves the erroneous regular-expression pattern.

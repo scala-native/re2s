@@ -11,7 +11,7 @@ package re2s
  * A single instruction in the regular expression virtual machine.
  * @see http://swtch.com/~rsc/regexp/regexp2.html
  */
-class Inst(var op: Inst.Op) {
+class Inst(var op: Inst.Op) extends Serializable {
   import Inst._, Op._
 
   var out: Int          = _ // all but MATCH, FAIL
