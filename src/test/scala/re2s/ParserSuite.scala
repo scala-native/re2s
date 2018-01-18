@@ -1,7 +1,17 @@
 package re2s
 
 import java.util
-import RE2.{FOLD_CASE, LITERAL, MATCH_NL, NON_GREEDY, PERL, PERL_X, POSIX, UNICODE_GROUPS, WAS_DOLLAR}
+import RE2.{
+  FOLD_CASE,
+  LITERAL,
+  MATCH_NL,
+  NON_GREEDY,
+  PERL,
+  PERL_X,
+  POSIX,
+  UNICODE_GROUPS,
+  WAS_DOLLAR
+}
 import Regexp.Op._
 
 import org.scalatest.FunSuite
@@ -20,7 +30,7 @@ class ParserSuite() extends FunSuite {
     override def applies(r: Int): Boolean = {
       if (Unicode.isUpper(r)) return true
       var c = Unicode.simpleFold(r)
-      while ( {
+      while ({
         c != r
       }) {
         if (Unicode.isUpper(c)) return true
@@ -123,8 +133,10 @@ class ParserSuite() extends FunSuite {
     Array("[[:^lower:]]", "cc{0x0-0x60 0x7b-0x10ffff}"),
     Array("(?i)[[:lower:]]", "cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}"),
     Array("(?i)[a-z]", "cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}"),
-    Array("(?i)[^[:lower:]]", "cc{0x0-0x40 0x5b-0x60 0x7b-0x17e 0x180-0x2129 0x212b-0x10ffff}"),
-    Array("(?i)[[:^lower:]]", "cc{0x0-0x40 0x5b-0x60 0x7b-0x17e 0x180-0x2129 0x212b-0x10ffff}"),
+    Array("(?i)[^[:lower:]]",
+          "cc{0x0-0x40 0x5b-0x60 0x7b-0x17e 0x180-0x2129 0x212b-0x10ffff}"),
+    Array("(?i)[[:^lower:]]",
+          "cc{0x0-0x40 0x5b-0x60 0x7b-0x17e 0x180-0x2129 0x212b-0x10ffff}"),
     Array("\\d", "cc{0x30-0x39}"),
     Array("\\D", "cc{0x0-0x2f 0x3a-0x10ffff}"),
     Array("\\s", "cc{0x9-0xa 0xc-0xd 0x20}"),
@@ -132,7 +144,9 @@ class ParserSuite() extends FunSuite {
     Array("\\w", "cc{0x30-0x39 0x41-0x5a 0x5f 0x61-0x7a}"),
     Array("\\W", "cc{0x0-0x2f 0x3a-0x40 0x5b-0x5e 0x60 0x7b-0x10ffff}"),
     Array("(?i)\\w", "cc{0x30-0x39 0x41-0x5a 0x5f 0x61-0x7a 0x17f 0x212a}"),
-    Array("(?i)\\W", "cc{0x0-0x2f 0x3a-0x40 0x5b-0x5e 0x60 0x7b-0x17e 0x180-0x2129 0x212b-0x10ffff}"),
+    Array(
+      "(?i)\\W",
+      "cc{0x0-0x2f 0x3a-0x40 0x5b-0x5e 0x60 0x7b-0x17e 0x180-0x2129 0x212b-0x10ffff}"),
     Array("[^\\\\]", "cc{0x0-0x5b 0x5d-0x10ffff}"),
     //  { "\\C", "byte{}" },  // probably never
     // Unicode, negatives, and a double negative.
@@ -140,12 +154,16 @@ class ParserSuite() extends FunSuite {
     Array("\\P{Braille}", "cc{0x0-0x27ff 0x2900-0x10ffff}"),
     Array("\\p{^Braille}", "cc{0x0-0x27ff 0x2900-0x10ffff}"),
     Array("\\P{^Braille}", "cc{0x2800-0x28ff}"),
-    Array("\\pZ", "cc{0x20 0xa0 0x1680 0x180e 0x2000-0x200a 0x2028-0x2029 0x202f 0x205f 0x3000}"),
+    Array(
+      "\\pZ",
+      "cc{0x20 0xa0 0x1680 0x180e 0x2000-0x200a 0x2028-0x2029 0x202f 0x205f 0x3000}"),
     Array("[\\p{Braille}]", "cc{0x2800-0x28ff}"),
     Array("[\\P{Braille}]", "cc{0x0-0x27ff 0x2900-0x10ffff}"),
     Array("[\\p{^Braille}]", "cc{0x0-0x27ff 0x2900-0x10ffff}"),
     Array("[\\P{^Braille}]", "cc{0x2800-0x28ff}"),
-    Array("[\\pZ]", "cc{0x20 0xa0 0x1680 0x180e 0x2000-0x200a 0x2028-0x2029 0x202f 0x205f 0x3000}"),
+    Array(
+      "[\\pZ]",
+      "cc{0x20 0xa0 0x1680 0x180e 0x2000-0x200a 0x2028-0x2029 0x202f 0x205f 0x3000}"),
     Array("\\p{Lu}", mkCharClass(IS_UPPER)),
     Array("[\\p{Lu}]", mkCharClass(IS_UPPER)),
     Array("(?i)[\\p{Lu}]", mkCharClass(IS_UPPER_FOLD)),
@@ -170,12 +188,15 @@ class ParserSuite() extends FunSuite {
     // Test flattening.
     Array("(?:a)", "lit{a}"),
     Array("(?:ab)(?:cd)", "str{abcd}"),
-    Array("(?:a+b+)(?:c+d+)", "cat{plus{lit{a}}plus{lit{b}}plus{lit{c}}plus{lit{d}}}"),
-    Array("(?:a+|b+)|(?:c+|d+)", "alt{plus{lit{a}}plus{lit{b}}plus{lit{c}}plus{lit{d}}}"),
+    Array("(?:a+b+)(?:c+d+)",
+          "cat{plus{lit{a}}plus{lit{b}}plus{lit{c}}plus{lit{d}}}"),
+    Array("(?:a+|b+)|(?:c+|d+)",
+          "alt{plus{lit{a}}plus{lit{b}}plus{lit{c}}plus{lit{d}}}"),
     Array("(?:a|b)|(?:c|d)", "cc{0x61-0x64}"),
     Array("a|.", "dot{}"),
     Array(".|a", "dot{}"),
-    Array("(?:[abc]|A|Z|hello|world)", "alt{cc{0x41 0x5a 0x61-0x63}str{hello}str{world}}"),
+    Array("(?:[abc]|A|Z|hello|world)",
+          "alt{cc{0x41 0x5a 0x61-0x63}str{hello}str{world}}"),
     Array("(?:[abc]|A|Z)", "cc{0x41 0x5a 0x61-0x63}"),
     // Test Perl quoted literals
     Array("\\Q+|*?{[\\E", "str{+|*?{[}"),
@@ -201,7 +222,9 @@ class ParserSuite() extends FunSuite {
     Array("abcde", "str{abcde}"),
     Array("[Aa][Bb]cd", "cat{strfold{AB}str{cd}}"),
     // Factoring.
-    Array("abc|abd|aef|bcx|bcy", "alt{cat{lit{a}alt{cat{lit{b}cc{0x63-0x64}}str{ef}}}cat{str{bc}cc{0x78-0x79}}}"),
+    Array(
+      "abc|abd|aef|bcx|bcy",
+      "alt{cat{lit{a}alt{cat{lit{b}cc{0x63-0x64}}str{ef}}}cat{str{bc}cc{0x78-0x79}}}"),
 //    Array("ax+y|ax+z|ay+w", "cat{lit{a}alt{cat{plus{lit{x}}cc{0x79-0x7a}}cat{plus{lit{y}}lit{w}}}}"), // TODO: fails because of equals  if (first != null && first.equals(ifirst)) {
     // Bug fixes.
     Array("(?:.)", "dot{}"),
@@ -220,7 +243,9 @@ class ParserSuite() extends FunSuite {
     // RE2 prefix_tests
     Array("abc|abd", "cat{str{ab}cc{0x63-0x64}}"),
     Array("a(?:b)c|abd", "cat{str{ab}cc{0x63-0x64}}"),
-    Array("abc|abd|aef|bcx|bcy", "alt{cat{lit{a}alt{cat{lit{b}cc{0x63-0x64}}str{ef}}}" + "cat{str{bc}cc{0x78-0x79}}}"),
+    Array(
+      "abc|abd|aef|bcx|bcy",
+      "alt{cat{lit{a}alt{cat{lit{b}cc{0x63-0x64}}str{ef}}}" + "cat{str{bc}cc{0x78-0x79}}}"),
     Array("abc|x|abd", "alt{str{abc}lit{x}str{abd}}"),
     Array("(?i)abc|ABD", "cat{strfold{AB}cc{0x43-0x44 0x63-0x64}}"),
 //    Array("[ab]c|[ab]d", "cat{cc{0x61-0x62}cc{0x63-0x64}}"),
@@ -237,28 +262,41 @@ class ParserSuite() extends FunSuite {
     testParseDump(PARSE_TESTS, TEST_FLAGS)
   }
 
-  private val FOLDCASE_TESTS = Array(Array("AbCdE", "strfold{ABCDE}"), Array("[Aa]", "litfold{A}"), Array("a", "litfold{A}"), // 0x17F is an old English long s (looks like an f) and folds to s.
+  private val FOLDCASE_TESTS = Array(
+    Array("AbCdE", "strfold{ABCDE}"),
+    Array("[Aa]", "litfold{A}"),
+    Array("a", "litfold{A}"), // 0x17F is an old English long s (looks like an f) and folds to s.
     // 0x212A is the Kelvin symbol and folds to k.
     Array("A[F-g]", "cat{litfold{A}cc{0x41-0x7a 0x17f 0x212a}}"), // [Aa][A-z...]
-    Array("[[:upper:]]", "cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}"), Array("[[:lower:]]", "cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}"))
+    Array("[[:upper:]]", "cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}"),
+    Array("[[:lower:]]", "cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}")
+  )
 
   test("ParseFoldCase") {
     testParseDump(FOLDCASE_TESTS, FOLD_CASE)
   }
 
-  private val LITERAL_TESTS = Array(Array("(|)^$.[*+?]{5,10},\\", "str{(|)^$.[*+?]{5,10},\\}"))
+  private val LITERAL_TESTS = Array(
+    Array("(|)^$.[*+?]{5,10},\\", "str{(|)^$.[*+?]{5,10},\\}"))
 
   test("ParseLiteral") {
     testParseDump(LITERAL_TESTS, LITERAL)
   }
 
-  private val MATCHNL_TESTS = Array(Array(".", "dot{}"), Array("\n", "lit{\n}"), Array("[^a]", "cc{0x0-0x60 0x62-0x10ffff}"), Array("[a\\n]", "cc{0xa 0x61}"))
+  private val MATCHNL_TESTS = Array(Array(".", "dot{}"),
+                                    Array("\n", "lit{\n}"),
+                                    Array("[^a]", "cc{0x0-0x60 0x62-0x10ffff}"),
+                                    Array("[a\\n]", "cc{0xa 0x61}"))
 
   test("ParseMatchNL") {
     testParseDump(MATCHNL_TESTS, MATCH_NL)
   }
 
-  private val NOMATCHNL_TESTS = Array(Array(".", "dnl{}"), Array("\n", "lit{\n}"), Array("[^a]", "cc{0x0-0x9 0xb-0x60 0x62-0x10ffff}"), Array("[a\\n]", "cc{0xa 0x61}"))
+  private val NOMATCHNL_TESTS = Array(
+    Array(".", "dnl{}"),
+    Array("\n", "lit{\n}"),
+    Array("[^a]", "cc{0x0-0x9 0xb-0x60 0x62-0x10ffff}"),
+    Array("[a\\n]", "cc{0xa 0x61}"))
 
   test("ParseNoMatchNL") {
     testParseDump(NOMATCHNL_TESTS, 0)
@@ -269,9 +307,10 @@ class ParserSuite() extends FunSuite {
     for (test <- tests) {
       try {
         val re = Parser.parse(test(0), flags)
-        val d = dump(re)
+        val d  = dump(re)
         if (!(test(1) == d)) {
-          fail(String.format("parse/dump of " + test(0) + " expected " + test(1) + ", got " + d))
+          fail(String.format(
+            "parse/dump of " + test(0) + " expected " + test(1) + ", got " + d))
         }
       } catch {
         case e: PatternSyntaxException =>
@@ -294,25 +333,26 @@ class ParserSuite() extends FunSuite {
   private def dumpRegexp(b: StringBuffer, re: Regexp): Unit = {
     val name = OP_NAMES.get(re.op)
     if (name == null) b.append("op").append(re.op)
-    else re.op match {
-      case STAR | PLUS | QUEST | REPEAT =>
-        if ((re.flags & NON_GREEDY) != 0) b.append('n')
-        b.append(name)
-      case LITERAL =>
-        if (re.runes.length > 1) b.append("str")
-        else b.append("lit")
-        if ((re.flags & FOLD_CASE) != 0) {
-          var break = false
-          for (r <- re.runes if !break) {
-            if (Unicode.simpleFold(r) != r) {
-              b.append("fold")
-              break = true
+    else
+      re.op match {
+        case STAR | PLUS | QUEST | REPEAT =>
+          if ((re.flags & NON_GREEDY) != 0) b.append('n')
+          b.append(name)
+        case LITERAL =>
+          if (re.runes.length > 1) b.append("str")
+          else b.append("lit")
+          if ((re.flags & FOLD_CASE) != 0) {
+            var break = false
+            for (r <- re.runes if !break) {
+              if (Unicode.simpleFold(r) != r) {
+                b.append("fold")
+                break = true
+              }
             }
           }
-        }
-      case _ =>
-        b.append(name)
-    }
+        case _ =>
+          b.append(name)
+      }
     b.append('{')
     re.op match {
       case END_TEXT =>
@@ -338,8 +378,8 @@ class ParserSuite() extends FunSuite {
         dumpRegexp(b, re.subs(0))
       case CHAR_CLASS =>
         var sep = ""
-        var i = 0
-        while ( {
+        var i   = 0
+        while ({
           i < re.runes.length
         }) {
           b.append(sep)
@@ -357,10 +397,10 @@ class ParserSuite() extends FunSuite {
   }
 
   private def mkCharClass(f: RunePredicate): String = {
-    val re = new Regexp(Regexp.Op.CHAR_CLASS)
+    val re    = new Regexp(Regexp.Op.CHAR_CLASS)
     val runes = new util.ArrayList[Integer]
-    var lo = -1
-    var i = 0
+    var lo    = -1
+    var i     = 0
     while (i <= Unicode.MAX_RUNE) {
       if (f.applies(i)) {
         if (lo < 0) lo = i
@@ -407,40 +447,73 @@ class ParserSuite() extends FunSuite {
     out.toString
   }
 
-  private val INVALID_REGEXPS = Array("(", ")", "(a", "(a|b|", "(a|b", "[a-z", "([a-z)", "x{1001}", "x{9876543210}", "x{2,1}", "x{1,9876543210}", // Java string literals can't contain Invalid UTF-8.
+  private val INVALID_REGEXPS = Array(
+    "(",
+    ")",
+    "(a",
+    "(a|b|",
+    "(a|b",
+    "[a-z",
+    "([a-z)",
+    "x{1001}",
+    "x{9876543210}",
+    "x{2,1}",
+    "x{1,9876543210}", // Java string literals can't contain Invalid UTF-8.
     // "\\xff",
     // "[\xff]",
     // "[\\\xff]",
     // "\\\xff",
-    "(?P<name>a", "(?P<name>", "(?P<name", "(?P<x y>a)", "(?P<>a)", "[a-Z]", "(?i)[a-Z]", "a{100000}", "a{100000,}")
+    "(?P<name>a",
+    "(?P<name>",
+    "(?P<name",
+    "(?P<x y>a)",
+    "(?P<>a)",
+    "[a-Z]",
+    "(?i)[a-Z]",
+    "a{100000}",
+    "a{100000,}"
+  )
 
-  private val ONLY_PERL = Array("[a-b-c]", "\\Qabc\\E", "\\Q*+?{[\\E", "\\Q\\\\E", "\\Q\\\\\\E", "\\Q\\\\\\\\E", "\\Q\\\\\\\\\\E", "(?:a)", "(?P<name>a)")
+  private val ONLY_PERL = Array("[a-b-c]",
+                                "\\Qabc\\E",
+                                "\\Q*+?{[\\E",
+                                "\\Q\\\\E",
+                                "\\Q\\\\\\E",
+                                "\\Q\\\\\\\\E",
+                                "\\Q\\\\\\\\\\E",
+                                "(?:a)",
+                                "(?P<name>a)")
 
-  private val ONLY_POSIX = Array("a++", "a**", "a?*", "a+*", "a{1}*", ".{1}{2}.{3}")
+  private val ONLY_POSIX =
+    Array("a++", "a**", "a?*", "a+*", "a{1}*", ".{1}{2}.{3}")
 
   test("ParseInvalidRegexps") {
     for (regexp <- INVALID_REGEXPS) {
       try {
         val re = Parser.parse(regexp, PERL)
-        fail("Parsing (PERL) " + regexp + " should have failed, instead got " + dump(re))
+        fail(
+          "Parsing (PERL) " + regexp + " should have failed, instead got " + dump(
+            re))
       } catch {
         case e: PatternSyntaxException =>
-
         /* ok */
       }
       try {
         val re = Parser.parse(regexp, POSIX)
-        fail("parsing (POSIX) " + regexp + " should have failed, instead got " + dump(re))
+        fail(
+          "parsing (POSIX) " + regexp + " should have failed, instead got " + dump(
+            re))
       } catch {
         case e: PatternSyntaxException =>
-
       }
     }
     for (regexp <- ONLY_PERL) {
       Parser.parse(regexp, PERL)
       try {
         val re = Parser.parse(regexp, POSIX)
-        fail("parsing (POSIX) " + regexp + " should have failed, instead got " + dump(re))
+        fail(
+          "parsing (POSIX) " + regexp + " should have failed, instead got " + dump(
+            re))
       } catch {
         case _: PatternSyntaxException =>
       }
@@ -448,7 +521,9 @@ class ParserSuite() extends FunSuite {
     for (regexp <- ONLY_POSIX) {
       try {
         val re = Parser.parse(regexp, PERL)
-        fail("parsing (PERL) " + regexp + " should have failed, instead got " + dump(re))
+        fail(
+          "parsing (PERL) " + regexp + " should have failed, instead got " + dump(
+            re))
       } catch {
         case _: PatternSyntaxException =>
       }
@@ -459,7 +534,7 @@ class ParserSuite() extends FunSuite {
   test("ToStringEquivalentParse") {
     for (tt <- PARSE_TESTS) {
       val re = Parser.parse(tt(0), TEST_FLAGS)
-      val d = dump(re)
+      val d  = dump(re)
       assert(d == tt(1)) // (already ensured by testParseSimple)
 
       val s = re.toString
@@ -469,7 +544,7 @@ class ParserSuite() extends FunSuite {
         // toString produces "\\{" for a literal brace,
         // but "{" is a shorter equivalent in some contexts.
         val nre = Parser.parse(s, TEST_FLAGS)
-        val nd = dump(nre)
+        val nd  = dump(nre)
         assert(d == nd, "parse(%s) -> %s".format(tt(0), s))
         val ns = nre.toString
         assert(s == ns, "parse(%s) -> %s".format(tt(0), s))

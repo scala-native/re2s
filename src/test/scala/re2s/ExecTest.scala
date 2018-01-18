@@ -53,7 +53,8 @@ import org.scalatest.FunSuite
 class ExecTest() extends FunSuite {
   test("ExamplesInDocumentation") {
     val re = RE2.compile("(?i:co(.)a)")
-    assert(Array("Copa", "coba").deep == re.findAll("Copacobana", 10).toArray.deep)
+    assert(
+      Array("Copa", "coba").deep == re.findAll("Copacobana", 10).toArray.deep)
     val x = re.findAllSubmatch("Copacobana", 100)
     assert(Array("Copa", "p").deep == x.get(0).deep)
     assert(Array("coba", "b").deep == x.get(1).deep)
@@ -69,48 +70,51 @@ class ExecTest() extends FunSuite {
 
   def testRE2(_file: String) = {
     var file = _file
-    var in = classOf[ExecTest].getResourceAsStream("/" + file)
+    var in   = classOf[ExecTest].getResourceAsStream("/" + file)
     // TODO(adonovan): call in.close() on all paths.
     if (file.endsWith(".gz")) {
       in = new GZIPInputStream(in)
       file = file.substring(0, file.length - ".gz".length) // for errors
     }
-    var lineno = 0
-    val r = new UNIXBufferedReader(new InputStreamReader(in, "UTF-8"))
+    var lineno  = 0
+    val r       = new UNIXBufferedReader(new InputStreamReader(in, "UTF-8"))
     val strings = new util.ArrayList[String]
-    var input = 0
+    var input   = 0
     // next index within strings to read
-    var inStrings = false
-    var re: RE2 = null
-    var refull: RE2 = null
-    var nfail = 0
-    var ncase = 0
+    var inStrings    = false
+    var re: RE2      = null
+    var refull: RE2  = null
+    var nfail        = 0
+    var ncase        = 0
     var line: String = null
-    var continue = false
-    while ({line = r.readLine; line != null}) {
+    var continue     = false
+    while ({ line = r.readLine; line != null }) {
       lineno += 1
-      if (line.isEmpty) fail("%s:%d: unexpected blank line".format(file, lineno))
+      if (line.isEmpty)
+        fail("%s:%d: unexpected blank line".format(file, lineno))
       val first = line.charAt(0)
       if (first == '#') continue = true //todo: continue is not supported
-      if(!continue) {
+      if (!continue) {
         if ('A' <= first && first <= 'Z') { // Test name.
           System.err.println(line)
 //          continue //todo: continue is not supported
-        }
-        else if (line == "strings") {
-          if (input < strings.size) fail("%s:%d: out of sync: have %d strings left".format(file, lineno, strings.size - input))
+        } else if (line == "strings") {
+          if (input < strings.size)
+            fail(
+              "%s:%d: out of sync: have %d strings left"
+                .format(file, lineno, strings.size - input))
           strings.clear()
           inStrings = true
-        }
-        else if (line == "regexps") inStrings = false
+        } else if (line == "regexps") inStrings = false
         else if (first == '"') {
           var q: String = null
-          try
-            q = Strconv.unquote(line)
+          try q = Strconv.unquote(line)
           catch {
             case e: Exception =>
               // Fatal because we'll get out of sync.
-              fail("%s:%d: unquote %s: %s".format(file, lineno, line, e.getMessage))
+              fail(
+                "%s:%d: unquote %s: %s"
+                  .format(file, lineno, line, e.getMessage))
               q = null // unreachable
 
           }
@@ -118,47 +122,50 @@ class ExecTest() extends FunSuite {
             strings.add(q)
             continue = true
           }
-          if(!continue) {
+          if (!continue) {
             // Is a regexp.
             re = null
             refull = null
-            try
-              re = RE2.compile(q)
+            try re = RE2.compile(q)
             catch {
               case e: Throwable =>
                 // (handle compiler panic too)
                 if (e.getMessage == "error parsing regexp: invalid escape sequence: `\\C`") { // We don't and likely never will support \C; keep going.
                   continue = true
                 }
-                if(!continue) {
-                  System.err.println("%s:%d: compile %s: %s\n".format(file, lineno, q, e.getMessage))
-                  if ( {
+                if (!continue) {
+                  System.err.println(
+                    "%s:%d: compile %s: %s\n"
+                      .format(file, lineno, q, e.getMessage))
+                  if ({
                     nfail += 1;
                     nfail
                   } >= 100) fail("stopping after " + nfail + " errors")
                   continue = true
                 }
             }
-            if(!continue) {
+            if (!continue) {
               val full = "\\A(?:" + q + ")\\z"
-              try
-                refull = RE2.compile(full)
+              try refull = RE2.compile(full)
               catch {
                 case e: Throwable =>
                   // Fatal because q worked, so this should always work.
-                  fail("%s:%d: compile full %s: %s".format(file, lineno, full, e.getMessage))
+                  fail(
+                    "%s:%d: compile full %s: %s"
+                      .format(file, lineno, full, e.getMessage))
               }
               input = 0
             }
           }
-        }
-        else if (first == '-' || '0' <= first && first <= '9') { // A sequence of match results.
+        } else if (first == '-' || '0' <= first && first <= '9') { // A sequence of match results.
           ncase += 1
           if (re == null) { // Failed to compile: skip results.
             continue = true
           }
           if (!continue) {
-            if (input >= strings.size) fail("%s:%d: out of sync: no input remaining".format(file, lineno))
+            if (input >= strings.size)
+              fail(
+                "%s:%d: out of sync: no input remaining".format(file, lineno))
             val text = strings.get(input)
             input += 1
             val multibyte = !isSingleBytes(text)
@@ -168,17 +175,21 @@ class ExecTest() extends FunSuite {
               // runes, so it disagrees.  Skip those cases.
               continue = true
             }
-            if(!continue) {
+            if (!continue) {
               val res = line.split(";")
-              if (res.length != 4) fail("%s:%d: have %d test results, want %d".format(file, lineno, res.length, 4))
+              if (res.length != 4)
+                fail(
+                  "%s:%d: have %d test results, want %d"
+                    .format(file, lineno, res.length, 4))
               var i = 0
-              while ( {
+              while ({
                 i < 4
               }) {
                 val partial = (i & 1) != 0
                 val longest = (i & 2) != 0
-                val regexp = if (partial) re
-                else refull
+                val regexp =
+                  if (partial) re
+                  else refull
                 regexp.longest = longest
                 var have = regexp.findSubmatchIndex(text) // UTF-16 indices
                 if (multibyte && have != null) { // The testdata uses UTF-8 indices, but we're using the UTF-16 API.
@@ -187,46 +198,66 @@ class ExecTest() extends FunSuite {
                 }
                 val want = parseResult(file, lineno, res(i)) // UTF-8 indices
                 if (!Arrays.equals(want, have)) {
-                  System.err.println("%s:%d: %s[partial=%b,longest=%b].findSubmatchIndex(%s) = " + "%s, want %s\n".format(file, lineno, re, partial, longest, text, util.Arrays.toString(have), util.Arrays.toString(want)))
-                  if ( {
+                  System.err.println(
+                    "%s:%d: %s[partial=%b,longest=%b].findSubmatchIndex(%s) = " + "%s, want %s\n"
+                      .format(file,
+                              lineno,
+                              re,
+                              partial,
+                              longest,
+                              text,
+                              util.Arrays.toString(have),
+                              util.Arrays.toString(want)))
+                  if ({
                     nfail += 1;
                     nfail
                   } >= 100) fail("stopping after " + nfail + " errors")
                   continue = true
                 }
-                if(!continue) {
+                if (!continue) {
                   regexp.longest = longest
                   val b = regexp.match_(text)
                   if (b != (want != null)) {
-                    System.err.println("%s:%d: %s[partial=%b,longest=%b].match(%s) = " + "%b, want %b\n".format(file, lineno, re, partial, longest, text, b, !b))
-                    if ( {
+                    System.err.println(
+                      "%s:%d: %s[partial=%b,longest=%b].match(%s) = " + "%b, want %b\n"
+                        .format(file,
+                                lineno,
+                                re,
+                                partial,
+                                longest,
+                                text,
+                                b,
+                                !b))
+                    if ({
                       nfail += 1;
                       nfail
                     } >= 100) fail("stopping after " + nfail + " errors")
                     continue = true
                   }
 
-                  if(!continue)
+                  if (!continue)
                     i += 1
                 }
               }
             }
           }
-        }
-        else fail("%s:%d: out of sync: %s\n".format(file, lineno, line))
+        } else fail("%s:%d: out of sync: %s\n".format(file, lineno, line))
       }
       continue = false
     }
-    if (input < strings.size) fail("%s:%d: out of sync: have %d strings left at EOF".format(file, lineno, strings.size - input))
+    if (input < strings.size)
+      fail(
+        "%s:%d: out of sync: have %d strings left at EOF"
+          .format(file, lineno, strings.size - input))
     if (nfail > 0) fail("Of %d cases tested, %d failed".format(ncase, nfail))
     else System.err.println("%d cases tested\n".format(ncase))
   }
 
   // Returns true iff there are no runes with multibyte UTF-8 encodings in s.
   private def isSingleBytes(s: String): Boolean = {
-    var i = 0
+    var i   = 0
     val len = s.length
-    while ( {
+    while ({
       i < len
     }) {
       if (s.charAt(i) >= 0x80) return false
@@ -240,37 +271,41 @@ class ExecTest() extends FunSuite {
 
   // Convert |idx16|, which are Java (UTF-16) string indices, into the
   // corresponding indices in the UTF-8 encoding of |text|.
-  private def utf16IndicesToUtf8(idx16: Array[Int], text: String) = try {
-    val idx8 = new Array[Int](idx16.length)
-    var i = 0
-    while ( {
-      i < idx16.length
-    }) {
-      idx8(i) = text.substring(0, idx16(i)).getBytes("UTF-8").length
+  private def utf16IndicesToUtf8(idx16: Array[Int], text: String) =
+    try {
+      val idx8 = new Array[Int](idx16.length)
+      var i    = 0
+      while ({
+        i < idx16.length
+      }) {
+        idx8(i) = text.substring(0, idx16(i)).getBytes("UTF-8").length
 
-      {
-        i += 1; i
+        {
+          i += 1; i
+        }
       }
+      idx8
+    } catch {
+      case e: java.io.UnsupportedEncodingException =>
+        throw new IllegalStateException(e)
     }
-    idx8
-  } catch {
-    case e: java.io.UnsupportedEncodingException =>
-      throw new IllegalStateException(e)
-  }
 
-  private def parseResult(file: String, lineno: Int, res: String): Array[Int] = { // A single - indicates no match.
+  private def parseResult(
+      file: String,
+      lineno: Int,
+      res: String): Array[Int] = { // A single - indicates no match.
     if (res == "-") return null
     // Otherwise, a space-separated list of pairs.
     var n = 1
     // TODO(adonovan): is this safe or must we decode UTF-16?
     val len = res.length
-    var j = 0
+    var j   = 0
     while (j < len) {
       if (res.charAt(j) == ' ') n += 1
       j += 1
     }
     val out = new Array[Int](2 * n)
-    var i = 0
+    var i   = 0
     n = 0
     j = 0
     while (j <= len) {
@@ -283,8 +318,7 @@ class ExecTest() extends FunSuite {
           out({
             n += 1; n - 1
           }) = -1
-        }
-        else {
+        } else {
           val k = pair.indexOf('-')
           if (k < 0) fail("%s:%d: invalid pair %s".format(file, lineno, pair))
           var lo = -1
@@ -294,7 +328,6 @@ class ExecTest() extends FunSuite {
             hi = Integer.valueOf(pair.substring(k + 1))
           } catch {
             case e: NumberFormatException =>
-
             /* fall through */
           }
           if (lo > hi) fail("%s:%d: invalid pair %s".format(file, lineno, pair))
@@ -330,13 +363,13 @@ class ExecTest() extends FunSuite {
   private val NOTAB = RE2.compilePOSIX("[^\t]+")
 
   def testFowler(file: String): Unit = {
-    val in = classOf[ExecTest].getResourceAsStream("/" + file)
-    val r = new UNIXBufferedReader(new InputStreamReader(in, "UTF-8"))
-    var lineno = 0
-    var nerr = 0
+    val in           = classOf[ExecTest].getResourceAsStream("/" + file)
+    val r            = new UNIXBufferedReader(new InputStreamReader(in, "UTF-8"))
+    var lineno       = 0
+    var nerr         = 0
     var line: String = null
-    var lastRegexp = ""
-    while ({line = r.readLine; line != null}) {
+    var lastRegexp   = ""
+    while ({ line = r.readLine; line != null }) {
       var continue = false
       lineno += 1
       // if (line.isEmpty()) {
@@ -352,8 +385,8 @@ class ExecTest() extends FunSuite {
       if (line.isEmpty || line.charAt(0) == '#') continue = true
       if (!continue) {
         val field = NOTAB.findAll(line, -1)
-        var i = 0
-        while ( {
+        var i     = 0
+        while ({
           i < field.size
         }) {
           if (field.get(i) == "NULL") field.set(i, "")
@@ -362,9 +395,9 @@ class ExecTest() extends FunSuite {
             continue = true
           }
 
-          if(!continue) i += 1
+          if (!continue) i += 1
         }
-        if(!continue) {
+        if (!continue) {
           if (field.isEmpty) continue = true
           //   Field 1: the regex(3) flags to apply, one character per
           //   REG_feature flag. The test is skipped if REG_feature is not
@@ -423,7 +456,7 @@ class ExecTest() extends FunSuite {
           //     N[OTE] comment   comment copied as output NOTE
           //     T[EST] comment   comment
           //     number           use number for nmatch (20 by default)
-          if(!continue) {
+          if (!continue) {
             var flag = field.get(0)
             flag.charAt(0) match {
               case '?' | '&' | '|' | ';' | '{' | '}' =>
@@ -437,38 +470,40 @@ class ExecTest() extends FunSuite {
                   System.err.format("skip: %s\n", line)
                   continue = true //todo: continue is not supported
                 }
-                if(!continue) flag = flag.substring(1 + i + 1)
+                if (!continue) flag = flag.substring(1 + i + 1)
 
-              case 'C' | 'N' | 'T' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' =>
+              case 'C' | 'N' | 'T' | '0' | '1' | '2' | '3' | '4' | '5' | '6' |
+                  '7' | '8' | '9' =>
                 System.err.println("skip: %s\n".format(line))
                 continue = true
               case _ =>
             }
-            if(!continue) {
+            if (!continue) {
               // Can check field count now that we've handled the myriad comment
               // formats.
               if (field.size < 4) {
-                System.err.println("%s:%d: too few fields: %s\n".format(file, lineno, line))
+                System.err.println(
+                  "%s:%d: too few fields: %s\n".format(file, lineno, line))
                 nerr += 1
                 continue = true
               }
-              if(!continue) {
+              if (!continue) {
                 // Expand C escapes (a.k.a. Go escapes).
                 if (flag.indexOf('$') >= 0) {
                   var f = "\"" + field.get(1) + "\""
-                  try
-                    field.set(1, Strconv.unquote(f))
+                  try field.set(1, Strconv.unquote(f))
                   catch {
                     case e: Exception =>
-                      System.err.println("%s:%d: cannot unquote %s\n".format(file, lineno, f))
+                      System.err.println(
+                        "%s:%d: cannot unquote %s\n".format(file, lineno, f))
                       nerr += 1
                   }
                   f = "\"" + field.get(2) + "\""
-                  try
-                    field.set(2, Strconv.unquote(f))
+                  try field.set(2, Strconv.unquote(f))
                   catch {
                     case e: Exception =>
-                      System.err.println("%s:%d: cannot unquote %s\n".format(file, lineno, f))
+                      System.err.println(
+                        "%s:%d: cannot unquote %s\n".format(file, lineno, f))
                       nerr += 1
                   }
                 }
@@ -482,21 +517,22 @@ class ExecTest() extends FunSuite {
                 val shouldCompileMatch = Array(false, false)
                 // in/out param to parser
                 var pos: util.List[Integer] = null
-                try
-                  pos = parseFowlerResult(field.get(3), shouldCompileMatch)
+                try pos = parseFowlerResult(field.get(3), shouldCompileMatch)
                 catch {
                   case e: Exception =>
-                    System.err.println("%s:%d: cannot parse result %s\n".format(file, lineno, field.get(3)))
+                    System.err.println(
+                      "%s:%d: cannot parse result %s\n"
+                        .format(file, lineno, field.get(3)))
                     nerr += 1
                     continue = true
                 }
                 //   Field 5: optional comment appended to the report.
                 // Run test once for each specified capital letter mode that we support.
-                if(!continue) {
+                if (!continue) {
                   var break = false
                   for (c <- flag.toCharArray if !break) {
                     var pattern = field.get(1)
-                    var flags = RE2.POSIX | RE2.CLASS_NL
+                    var flags   = RE2.POSIX | RE2.CLASS_NL
                     c match {
                       case 'E' =>
                         // extended regexp (what we support)
@@ -507,50 +543,76 @@ class ExecTest() extends FunSuite {
                       case _ =>
                         continue = true
                     }
-                    if(!break && !continue) {
+                    if (!break && !continue) {
                       if (flag.indexOf('i') >= 0) flags |= RE2.FOLD_CASE
                       var re: RE2 = null
-                      try
-                        re = RE2.compileImpl(pattern, flags, true)
+                      try re = RE2.compileImpl(pattern, flags, true)
                       catch {
                         case e: PatternSyntaxException =>
                           if (shouldCompileMatch(0)) {
-                            System.err.println("%s:%d: %s did not compile\n".format(file, lineno, pattern))
+                            System.err.println(
+                              "%s:%d: %s did not compile\n"
+                                .format(file, lineno, pattern))
                             nerr += 1
                           }
                           continue = true
                       }
-                      if(!continue) {
+                      if (!continue) {
                         if (!shouldCompileMatch(0)) {
-                          System.err.println("%s:%d: %s should not compile\n".format(file, lineno, pattern))
+                          System.err.println(
+                            "%s:%d: %s should not compile\n"
+                              .format(file, lineno, pattern))
                           nerr += 1
                           continue = true
                         }
-                        if(!continue) {
+                        if (!continue) {
                           val match0 = re.match_(text)
                           if (match0 != shouldCompileMatch(1)) {
-                            System.err.println("%s:%d: %s.match(%s) = %s, want %s\n".format(file, lineno, pattern, text, match0, !match0))
+                            System.err.println(
+                              "%s:%d: %s.match(%s) = %s, want %s\n".format(
+                                file,
+                                lineno,
+                                pattern,
+                                text,
+                                match0,
+                                !match0))
                             nerr += 1
                             continue = true
                           }
-                          if(!continue) {
+                          if (!continue) {
                             var haveArray = re.findSubmatchIndex(text)
                             if (haveArray == null) haveArray = Utils.EMPTY_INTS // to make .length and printing safe
                             if ((haveArray.length > 0) != match0) {
-                              System.err.println("%s:%d: %s.match(%s) = %s, " + "but %s.findSubmatchIndex(%s) = %s\n".format(file, lineno, pattern, text, match0, pattern, text, util.Arrays.toString(haveArray)))
+                              System.err.println(
+                                "%s:%d: %s.match(%s) = %s, " + "but %s.findSubmatchIndex(%s) = %s\n"
+                                  .format(file,
+                                          lineno,
+                                          pattern,
+                                          text,
+                                          match0,
+                                          pattern,
+                                          text,
+                                          util.Arrays.toString(haveArray)))
                               nerr += 1
                               continue = true
                             }
-                            if(!continue) {
+                            if (!continue) {
                               // Convert int[] to List<Integer> and truncate to pos.length.
                               val have = new util.ArrayList[Integer]
-                              var i = 0
+                              var i    = 0
                               while (i < pos.size) {
                                 have.add(haveArray(i))
                                 i += 1
                               }
                               if (!(have == pos)) {
-                                System.err.println("%s:%d: %s.findSubmatchIndex(%s) = %s, want %s\n".format(file, lineno, pattern, text, have, pos))
+                                System.err.println(
+                                  "%s:%d: %s.findSubmatchIndex(%s) = %s, want %s\n"
+                                    .format(file,
+                                            lineno,
+                                            pattern,
+                                            text,
+                                            have,
+                                            pos))
                                 nerr += 1
                                 continue = true
                               }
@@ -570,8 +632,10 @@ class ExecTest() extends FunSuite {
     if (nerr > 0) fail("There were " + nerr + " errors")
   }
 
-  private def parseFowlerResult(_s: String, shouldCompileMatch: Array[Boolean]): util.List[Integer] = {
-    var s = _s
+  private def parseFowlerResult(
+      _s: String,
+      shouldCompileMatch: Array[Boolean]): util.List[Integer] = {
+    var s    = _s
     val olds = s
     //   Field 4: the test outcome. This is either one of the posix error
     //     codes (with REG_ omitted) or the match array, a list of (m,n)
@@ -591,25 +655,24 @@ class ExecTest() extends FunSuite {
       shouldCompileMatch(0) = true
       shouldCompileMatch(1) = true
       return Collections.emptyList[Integer]
-    }
-    else if (s == "NOMATCH") { // Match failure.
+    } else if (s == "NOMATCH") { // Match failure.
       shouldCompileMatch(0) = true
       shouldCompileMatch(1) = false
       return Collections.emptyList[Integer]
-    }
-    else if ('A' <= s.charAt(0) && s.charAt(0) <= 'Z') { // All the other error codes are compile errors.
+    } else if ('A' <= s.charAt(0) && s.charAt(0) <= 'Z') { // All the other error codes are compile errors.
       shouldCompileMatch(0) = false
       return Collections.emptyList[Integer]
     }
     shouldCompileMatch(0) = true
     shouldCompileMatch(1) = true
     val result = new util.ArrayList[Integer]
-    while ( {
+    while ({
       !s.isEmpty
     }) {
       var end = ')'
       if ((result.size % 2) == 0) {
-        if (s.charAt(0) != '(') throw new RuntimeException("parse error: missing '('")
+        if (s.charAt(0) != '(')
+          throw new RuntimeException("parse error: missing '('")
         s = s.substring(1)
         end = ','
       }
@@ -622,7 +685,8 @@ class ExecTest() extends FunSuite {
       else result.add(-1)
       s = s.substring(i + 1)
     }
-    if ((result.size % 2) != 0) throw new RuntimeException("parse error: odd number of fields")
+    if ((result.size % 2) != 0)
+      throw new RuntimeException("parse error: odd number of fields")
     result
   }
 }

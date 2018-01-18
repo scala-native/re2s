@@ -4,7 +4,7 @@ import java.io.Reader
 
 class UNIXBufferedReader(r: Reader) extends Reader {
 //  private var r: Reader = null
-  private val buf = new Array[Char](4096)
+  private val buf    = new Array[Char](4096)
   private var buflen = 0 // length prefix of |buf| that is filled
 
   private var inext = 0 // index in buf of next char
@@ -17,7 +17,7 @@ class UNIXBufferedReader(r: Reader) extends Reader {
     while (true) { // Should we refill the buffer?
       if (inext >= buflen) {
         var n = 0
-        do n = r.read(buf, 0, buf.length) while ( {
+        do n = r.read(buf, 0, buf.length) while ({
           n == 0
         })
         if (n > 0) {
@@ -26,12 +26,13 @@ class UNIXBufferedReader(r: Reader) extends Reader {
         }
       }
       // Did we reach end-of-file?
-      if (inext >= buflen) return if (s != null && s.length > 0) s.toString
-      else null
+      if (inext >= buflen)
+        return if (s != null && s.length > 0) s.toString
+        else null
       // Did we read a newline?
       var i = 0
       i = inext
-      while ( {
+      while ({
         i < buflen
       }) {
         if (buf(i) == '\n') {
@@ -65,7 +66,8 @@ class UNIXBufferedReader(r: Reader) extends Reader {
 
   // Unimplemented:
 
-  override def read(buf: Array[Char], off: Int, len: Int) = throw new UnsupportedOperationException
+  override def read(buf: Array[Char], off: Int, len: Int) =
+    throw new UnsupportedOperationException
 
   override def read = throw new UnsupportedOperationException
 
