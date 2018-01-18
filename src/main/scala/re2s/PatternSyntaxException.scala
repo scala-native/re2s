@@ -34,7 +34,7 @@ class PatternSyntaxException(error: String, input: String, index: Int)
   override def getMessage(): String = {
     s"""$error near index $index
        |$getPattern
-       |${" "*getIndex()+"^"}""".stripMargin
+       |${" " * getIndex() + "^"}""".stripMargin
   }
 
   /**

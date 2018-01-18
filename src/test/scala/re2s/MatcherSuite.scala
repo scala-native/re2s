@@ -194,7 +194,8 @@ class MatcherSuite() extends FunSuite {
     assert(buf.toString == "_{a12z}_{a34z}_")
   }
 
-  ignore("(Not Supported) appendReplacement/appendTail with group replacement by name") {
+  ignore(
+    "(Not Supported) appendReplacement/appendTail with group replacement by name") {
     val buf = new StringBuffer()
     val m = matcher(
       "from (?P<S>.*) to (?P<D>.*)",

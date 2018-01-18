@@ -24,8 +24,7 @@ class RE2PatternSuite() extends FunSuite {
 
   test("SyntaxError") {
     var caught = false
-    try
-      Pattern.compile("abc(")
+    try Pattern.compile("abc(")
     catch {
       case e: PatternSyntaxException =>
         assert(4 == e.getIndex)
@@ -45,18 +44,37 @@ class RE2PatternSuite() extends FunSuite {
 
   test("MatchesWithFlags") {
     ApiTestUtils.testMatchesRE2("ab+c", 0, "abbbc", "cbba")
-    ApiTestUtils.testMatchesRE2("ab+c", Pattern.CASE_INSENSITIVE, "abBBc", "cbbba")
+    ApiTestUtils.testMatchesRE2("ab+c",
+                                Pattern.CASE_INSENSITIVE,
+                                "abBBc",
+                                "cbbba")
     ApiTestUtils.testMatchesRE2("ab.*c", 0, "abxyzc", "ab\nxyzc")
     ApiTestUtils.testMatchesRE2("ab.*c", Pattern.DOTALL, "ab\nxyzc", "aB\nxyzC")
-    ApiTestUtils.testMatchesRE2("ab.*c", Pattern.DOTALL | Pattern.CASE_INSENSITIVE, "aB\nxyzC", "z")
+    ApiTestUtils.testMatchesRE2("ab.*c",
+                                Pattern.DOTALL | Pattern.CASE_INSENSITIVE,
+                                "aB\nxyzC",
+                                "z")
     ApiTestUtils.testMatchesRE2("^ab.*c$", 0, "abc", "xyz\nabc\ndef")
-    ApiTestUtils.testMatchesRE2("^ab.*c$", Pattern.MULTILINE, "abc", "xyz\nabc\ndef")
+    ApiTestUtils.testMatchesRE2("^ab.*c$",
+                                Pattern.MULTILINE,
+                                "abc",
+                                "xyz\nabc\ndef")
     ApiTestUtils.testMatchesRE2("^ab.*c$", Pattern.MULTILINE, "abc", "")
-    ApiTestUtils.testMatchesRE2("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE, "ab\nc", "AB\nc")
-    ApiTestUtils.testMatchesRE2("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE | Pattern.CASE_INSENSITIVE, "AB\nc", "z")
+    ApiTestUtils.testMatchesRE2("^ab.*c$",
+                                Pattern.DOTALL | Pattern.MULTILINE,
+                                "ab\nc",
+                                "AB\nc")
+    ApiTestUtils.testMatchesRE2(
+      "^ab.*c$",
+      Pattern.DOTALL | Pattern.MULTILINE | Pattern.CASE_INSENSITIVE,
+      "AB\nc",
+      "z")
   }
 
-  private def testFind(regexp: String, flag: Int, `match`: String, nonMatch: String): Unit = {
+  private def testFind(regexp: String,
+                       flag: Int,
+                       `match`: String,
+                       nonMatch: String): Unit = {
     assert(Pattern.compile(regexp, flag).matcher(`match`).find)
     assert(!Pattern.compile(regexp, flag).matcher(nonMatch).find)
   }
@@ -66,33 +84,71 @@ class RE2PatternSuite() extends FunSuite {
     testFind("ab+c", Pattern.CASE_INSENSITIVE, "abBBc", "cbbba")
     testFind("ab.*c", 0, "xxabxyzc", "ab\nxyzc")
     testFind("ab.*c", Pattern.DOTALL, "ab\nxyzc", "aB\nxyzC")
-    testFind("ab.*c", Pattern.DOTALL | Pattern.CASE_INSENSITIVE, "xaB\nxyzCz", "z")
+    testFind("ab.*c",
+             Pattern.DOTALL | Pattern.CASE_INSENSITIVE,
+             "xaB\nxyzCz",
+             "z")
     testFind("^ab.*c$", 0, "abc", "xyz\nabc\ndef")
     testFind("^ab.*c$", Pattern.MULTILINE, "xyz\nabc\ndef", "xyz\nab\nc\ndef")
-    testFind("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE, "xyz\nab\nc\ndef", "xyz\nAB\nc\ndef")
-    testFind("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE | Pattern.CASE_INSENSITIVE, "xyz\nAB\nc\ndef", "z")
+    testFind("^ab.*c$",
+             Pattern.DOTALL | Pattern.MULTILINE,
+             "xyz\nab\nc\ndef",
+             "xyz\nAB\nc\ndef")
+    testFind("^ab.*c$",
+             Pattern.DOTALL | Pattern.MULTILINE | Pattern.CASE_INSENSITIVE,
+             "xyz\nAB\nc\ndef",
+             "z")
   }
 
   test("Split") {
     ApiTestUtils.testSplit("/", "abcde", Array[String]("abcde"))
-    ApiTestUtils.testSplit("/", "a/b/cc//d/e//", Array[String]("a", "b", "cc", "", "d", "e"))
-    ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 3, Array[String]("a", "b", "cc//d/e//"))
-    ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 4, Array[String]("a", "b", "cc", "/d/e//"))
-    ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 5, Array[String]("a", "b", "cc", "", "d/e//"))
-    ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 6, Array[String]("a", "b", "cc", "", "d", "e//"))
-    ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 7, Array[String]("a", "b", "cc", "", "d", "e", "/"))
-    ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 8, Array[String]("a", "b", "cc", "", "d", "e", "", ""))
-    ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 9, Array[String]("a", "b", "cc", "", "d", "e", "", ""))
+    ApiTestUtils.testSplit("/",
+                           "a/b/cc//d/e//",
+                           Array[String]("a", "b", "cc", "", "d", "e"))
+    ApiTestUtils.testSplit("/",
+                           "a/b/cc//d/e//",
+                           3,
+                           Array[String]("a", "b", "cc//d/e//"))
+    ApiTestUtils.testSplit("/",
+                           "a/b/cc//d/e//",
+                           4,
+                           Array[String]("a", "b", "cc", "/d/e//"))
+    ApiTestUtils.testSplit("/",
+                           "a/b/cc//d/e//",
+                           5,
+                           Array[String]("a", "b", "cc", "", "d/e//"))
+    ApiTestUtils.testSplit("/",
+                           "a/b/cc//d/e//",
+                           6,
+                           Array[String]("a", "b", "cc", "", "d", "e//"))
+    ApiTestUtils.testSplit("/",
+                           "a/b/cc//d/e//",
+                           7,
+                           Array[String]("a", "b", "cc", "", "d", "e", "/"))
+    ApiTestUtils.testSplit("/",
+                           "a/b/cc//d/e//",
+                           8,
+                           Array[String]("a", "b", "cc", "", "d", "e", "", ""))
+    ApiTestUtils.testSplit("/",
+                           "a/b/cc//d/e//",
+                           9,
+                           Array[String]("a", "b", "cc", "", "d", "e", "", ""))
     // The tests below are listed at
     // http://docs.oracle.com/javase/1.5.0/docs/api/java/util/regex/Pattern.html#split(java.lang.CharSequence, int)
-    val s = "boo:and:foo"
+    val s       = "boo:and:foo"
     val regexp1 = ":"
     val regexp2 = "o"
     ApiTestUtils.testSplit(regexp1, s, 2, Array[String]("boo", "and:foo"))
     ApiTestUtils.testSplit(regexp1, s, 5, Array[String]("boo", "and", "foo"))
     ApiTestUtils.testSplit(regexp1, s, -2, Array[String]("boo", "and", "foo"))
-    ApiTestUtils.testSplit(regexp2, s, 5, Array[String]("b", "", ":and:f", "", ""))
-    ApiTestUtils.testSplit(regexp2, s, -2, Array[String]("b", "", ":and:f", "", ""))
+    ApiTestUtils.testSplit(regexp2,
+                           s,
+                           5,
+                           Array[String]("b", "", ":and:f", "", ""))
+    ApiTestUtils.testSplit(regexp2,
+                           s,
+                           -2,
+                           Array[String]("b", "", ":and:f", "", ""))
     ApiTestUtils.testSplit(regexp2, s, 0, Array[String]("b", "", ":and:f"))
     ApiTestUtils.testSplit(regexp2, s, Array[String]("b", "", ":and:f"))
   }
@@ -114,9 +170,9 @@ class RE2PatternSuite() extends FunSuite {
     try {
       val out = new ObjectOutputStream(bytes)
       out.writeObject(obj)
-      val byteArray = bytes.toByteArray
+      val byteArray        = bytes.toByteArray
       val arrayInputStream = new ByteArrayInputStream(byteArray)
-      val in = new ObjectInputStream(arrayInputStream)
+      val in               = new ObjectInputStream(arrayInputStream)
       in.readObject.asInstanceOf[Pattern]
     } catch {
       case e: IOException =>
@@ -134,7 +190,8 @@ class RE2PatternSuite() extends FunSuite {
 
   test("Serialize") {
     assertSerializes(Pattern.compile("ab+c"))
-    assertSerializes(Pattern.compile("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE))
+    assertSerializes(
+      Pattern.compile("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE))
     assert(!reserialize(Pattern.compile("abc")).matcher("def").find)
   }
 }

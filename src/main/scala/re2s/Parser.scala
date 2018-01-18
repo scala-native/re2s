@@ -1021,12 +1021,14 @@ class Parser(wholeRegexp: String, _flags: Int) {
 
     val n = stack.size()
     if (n < 2) {
-      throw new PatternSyntaxException(ERR_MISSING_BRACKET, wholeRegexp, pos-1)
+      throw new PatternSyntaxException(ERR_MISSING_BRACKET,
+                                       wholeRegexp,
+                                       pos - 1)
     }
     val re1 = pop()
     val re2 = pop()
     if (re2.op != ROP.LEFT_PAREN) {
-      throw new PatternSyntaxException(ERR_MISSING_PAREN, wholeRegexp, pos-1)
+      throw new PatternSyntaxException(ERR_MISSING_PAREN, wholeRegexp, pos - 1)
     }
     // Restore flags at time of paren.
     this.flags = re2.flags
@@ -1078,7 +1080,9 @@ class Parser(wholeRegexp: String, _flags: Int) {
     t.skipString(name)
     val g = CharGroup.POSIX_GROUPS.get(name)
     if (g == null) {
-      throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.str, t.pos()-1)
+      throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
+                                       t.str,
+                                       t.pos() - 1)
     }
     cc.appendGroup(g, (flags & RE2.FOLD_CASE) != 0)
     true
@@ -1115,7 +1119,9 @@ class Parser(wholeRegexp: String, _flags: Int) {
       val end  = rest.indexOf('}')
       if (end < 0) {
         t.rewindTo(startPos)
-        throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.str, t.pos()-1)
+        throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
+                                         t.str,
+                                         t.pos() - 1)
       }
       name = rest.substring(0, end) // e.g. "Han"
       t.skipString(name)
@@ -1133,7 +1139,9 @@ class Parser(wholeRegexp: String, _flags: Int) {
 
     val pair = unicodeTable(name)
     if (pair == null) {
-      throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.str, t.pos()-1)
+      throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
+                                       t.str,
+                                       t.pos() - 1)
     }
     val tab  = pair.first
     val fold = pair.second // fold-equivalent table
@@ -1191,7 +1199,9 @@ class Parser(wholeRegexp: String, _flags: Int) {
         val s = t.rest()
         if (s.equals("-") || !s.startsWith("-]")) {
           t.rewindTo(startPos)
-          throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.str, t.pos()-1)
+          throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
+                                           t.str,
+                                           t.pos() - 1)
         }
       }
       first = false
@@ -1230,7 +1240,9 @@ class Parser(wholeRegexp: String, _flags: Int) {
               } else {
                 hi = parseClassChar(t, startPos)
                 if (hi < lo) {
-                  throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.str, t.pos()-1)
+                  throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
+                                                   t.str,
+                                                   t.pos() - 1)
                 }
               }
             }
@@ -1562,7 +1574,7 @@ object Parser {
   private def parseEscape(t: StringIterator): Int = {
     val startPos = t.pos()
     def invalidEscape: Nothing = {
-      throw new PatternSyntaxException(ERR_INVALID_ESCAPE, t.str, t.pos()-1)
+      throw new PatternSyntaxException(ERR_INVALID_ESCAPE, t.str, t.pos() - 1)
     }
     t.skip(1) // '\\'
     if (!t.more()) {
@@ -1680,7 +1692,9 @@ object Parser {
   // Pre: t at class char Post: t after it.
   private def parseClassChar(t: StringIterator, wholeClassPos: Int): Int = {
     if (!t.more()) {
-      throw new PatternSyntaxException(ERR_INVALID_CHAR_CLASS, t.str, t.pos()-1)
+      throw new PatternSyntaxException(ERR_INVALID_CHAR_CLASS,
+                                       t.str,
+                                       t.pos() - 1)
     }
 
     // Allow regular escape sequences even though

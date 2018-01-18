@@ -177,7 +177,7 @@ final class Matcher private (private val _pattern: Pattern) {
   /** Helper: finds subgroup information if needed for group. */
   private def loadGroup(group: Int, notGroup: Boolean): Unit = {
     if (group < 0 || group > _groupCount || !_hasMatch) {
-      if(notGroup)
+      if (notGroup)
         throw new IllegalStateException("No match available")
       else
         throw new IllegalStateException("No match found")

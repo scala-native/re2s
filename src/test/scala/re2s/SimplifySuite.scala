@@ -17,7 +17,6 @@ class SimplifySuite() extends FunSuite {
     Array("$", "$"),
     Array("[ac]", "[ac]"),
     Array("[^ac]", "[^ac]"),
-
     // Posix character classes
     Array("[[:alnum:]]", "[0-9A-Za-z]"),
     Array("[[:alpha:]]", "[A-Za-z]"),
@@ -31,7 +30,6 @@ class SimplifySuite() extends FunSuite {
     Array("[[:space:]]", "[\\t-\\r ]"),
     Array("[[:upper:]]", "[A-Z]"),
     Array("[[:xdigit:]]", "[0-9A-Fa-f]"),
-
     // Perl character classes
     Array("\\d", "[0-9]"),
     Array("\\s", "[\\t-\\n\\f-\\r ]"),
@@ -45,24 +43,19 @@ class SimplifySuite() extends FunSuite {
     Array("[\\D]", "[^0-9]"),
     Array("[\\S]", "[^\\t-\\n\\f-\\r ]"),
     Array("[\\W]", "[^0-9A-Z_a-z]"),
-
     // Posix repetitions
     Array("a{1}", "a"),
     Array("a{2}", "aa"),
     Array("a{5}", "aaaaa"),
     Array("a{0,1}", "a?"),
-
     // The next three are illegible because Simplify inserts (?:)
     // parens instead of () parens to avoid creating extra
     // captured subexpressions.  The comments show a version with fewer parens.
     Array("(a){0,2}", "(?:(a)(a)?)?"),
-
     //       (aa?)?
     Array("(a){0,4}", "(?:(a)(?:(a)(?:(a)(a)?)?)?)?"),
-
     //   (a(a(aa?)?)?)?
     Array("(a){2,6}", "(a)(a)(?:(a)(?:(a)(?:(a)(a)?)?)?)?"),
-
     // aa(a(a(aa?)?)?)?
     Array("a{0,2}", "(?:aa?)?"),
     Array("a{0,4}", "(?:a(?:a(?:aa?)?)?)?"),
@@ -71,7 +64,6 @@ class SimplifySuite() extends FunSuite {
     Array("a{1,}", "a+"),
     Array("a{2,}", "aa+"),
     Array("a{5,}", "aaaaa+"),
-
     // Test that operators simplify their arguments.
     Array("(?:a{1,}){1,}", "a+"),
     Array("(a{1,}b{1,})", "(a+b+)"),
@@ -81,7 +73,6 @@ class SimplifySuite() extends FunSuite {
     Array("(?:a{1,})?", "(?:a+)?"),
     Array("", "(?:)"),
     Array("a{0}", "(?:)"),
-
     // Character class simplification
     Array("[ab]", "[a-b]"),
     Array("[a-za-za-z]", "[a-z]"),
@@ -93,13 +84,10 @@ class SimplifySuite() extends FunSuite {
     Array("[a-ea-ha-m]", "[a-m]"),
     Array("[a-ma-ha-e]", "[a-m]"),
     Array("[a-zA-Z0-9 -~]", "[ -~]"),
-
     // Empty character classes
     Array("[^[:cntrl:][:^cntrl:]]", "[^\\x00-\\x{10FFFF}]"),
-
     // Full character classes
     Array("[[:cntrl:][:^cntrl:]]", "(?s:.)"),
-
     // Unicode case folding.
     Array("(?i)A", "(?i:A)"),
     Array("(?i)a", "(?i:A)"),
@@ -114,7 +102,6 @@ class SimplifySuite() extends FunSuite {
     Array("(?i)[a-z]", "[A-Za-z\u017F\u212A]"),
     Array("(?i)[\\x00-\\x{FFFD}]", "[\\x00-\uFFFD]"),
     Array("(?i)[\\x00-\\x{10FFFF}]", "(?s:.)"),
-
     // Empty string as a regular expression.
     // The empty string must be preserved inside parens in order
     // to make submatches work right, so these tests are less
@@ -141,7 +128,7 @@ class SimplifySuite() extends FunSuite {
     SIMPLIFY_TESTS.foreach {
       case Array(input, expected) =>
         val re = Parser.parse(input, RE2.MATCH_NL | RE2.PERL & ~RE2.ONE_LINE)
-        val s = Simplify.simplify(re).toString
+        val s  = Simplify.simplify(re).toString
         assert(expected == s, String.format("simplify(%s)", input))
     }
   }
