@@ -21,7 +21,7 @@ class PatternSuite() extends FunSuite {
   }
 
   test("quote") {
-    assert(Pattern.quote("1.5-2.0?") == "1\\.5\\-2\\.0\\?")
+    assert(Pattern.quote("1.5-2.0?") == "1\\.5-2\\.0\\?") // TODO: taken from re2j, behaviour might differ jdk
   }
 
   test("characters") {
