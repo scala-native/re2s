@@ -235,7 +235,7 @@ class CharClass private (unit: Unit) {
   // Does not mutate |table|.
   def appendTable(table: Array[Array[Int]]): CharClass = {
     var i = 0
-    while (i <= table.length) {
+    while (i < table.length) {
       val triple = table(i)
       val lo     = triple(0)
       val hi     = triple(1)
@@ -260,7 +260,7 @@ class CharClass private (unit: Unit) {
   def appendNegatedTable(table: Array[Array[Int]]): CharClass = {
     var nextLo = 0 // lo end of next class to add
     var i      = 0
-    while (i <= table.length) {
+    while (i < table.length) {
       val triple = table(i)
       val lo     = triple(0)
       val hi     = triple(1)
