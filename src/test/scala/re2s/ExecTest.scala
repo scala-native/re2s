@@ -130,7 +130,8 @@ class ExecTest() extends FunSuite {
             catch {
               case e: Throwable =>
                 // (handle compiler panic too)
-                if (e.getMessage.startsWith("Illegal/unsupported escape sequence")) { // We don't and likely never will support \C; keep going.
+                if (e.getMessage.startsWith(
+                      "Illegal/unsupported escape sequence")) { // We don't and likely never will support \C; keep going.
                   continue = true
                 }
                 if (!continue) {
@@ -223,7 +224,8 @@ class ExecTest() extends FunSuite {
                                 b,
                                 !b))
                     nfail += 1
-                    if (nfail >= 100) fail("stopping after " + nfail + " errors")
+                    if (nfail >= 100)
+                      fail("stopping after " + nfail + " errors")
                     continue = true
                   }
 
