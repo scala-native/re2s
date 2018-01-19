@@ -5,212 +5,7 @@ import java.util
 import org.scalatest.FunSuite
 
 class FindSuite() extends FunSuite {
-
-  // For each pattern/text pair, what is the expected output of each
-  // function?  We can derive the textual results from the indexed
-  // results, the non-submatch results from the submatched results, the
-  // single results from the 'all' results, and the String results from
-  // the UTF-8 results. Therefore the table includes only the
-  // findAllUTF8SubmatchIndex result.
-  case class Test(pat: String, text: String, n: Int, _x: Int*) {
-    val x: Array[Int] = _x.toArray
-    // The n and x parameters construct a [][]int by extracting n
-    // sequences from x.  This represents n matches with len(x)/n
-    // submatches each.
-
-    val textUTF8: Array[Byte] = GoTestUtils.utf8(text)
-    // Each element is an even-length array of indices into textUTF8.  Not null.
-    val matches = new Array[Array[Int]](n)
-    if (n > 0) {
-      val runLength = x.length / n
-      var j         = 0
-      var i         = 0
-      while (i < n) {
-        matches(i) = new Array[Int](runLength)
-        System.arraycopy(x, j, matches(i), 0, runLength)
-        j += runLength
-        if (j > x.length) fail("invalid build entry")
-        i += 1
-      }
-    }
-
-    def submatchBytes(i: Int, j: Int) =
-      Utils.subarray(textUTF8, matches(i)(2 * j), matches(i)(2 * j + 1))
-
-    def submatchString(i: Int, j: Int) =
-      GoTestUtils.fromUTF8(submatchBytes(i, j)) // yikes
-
-    override def toString: String = "pat=%s text=%s".format(pat, text)
-  }
-
-  // Used by RE2Test also.
-  val FIND_TESTS: Array[Test] = Array(
-    Test("", "", 1, 0, 0),
-    Test("^abcdefg", "abcdefg", 1, 0, 7),
-    Test("a+", "baaab", 1, 1, 4),
-    Test("abcd..", "abcdef", 1, 0, 6),
-    Test("a", "a", 1, 0, 1),
-    Test("x", "y", 0),
-    Test("b", "abc", 1, 1, 2),
-    Test(".", "a", 1, 0, 1),
-    Test(".*", "abcdef", 1, 0, 6),
-    Test("^", "abcde", 1, 0, 0),
-    Test("$", "abcde", 1, 5, 5),
-    Test("^abcd$", "abcd", 1, 0, 4),
-    Test("^bcd'", "abcdef", 0),
-    Test("^abcd$", "abcde", 0),
-    Test("a+", "baaab", 1, 1, 4),
-    Test("a*", "baaab", 3, 0, 0, 1, 4, 5, 5),
-    Test("[a-z]+", "abcd", 1, 0, 4),
-    Test("[^a-z]+", "ab1234cd", 1, 2, 6),
-    Test("[a\\-\\]z]+", "az]-bcz", 2, 0, 4, 6, 7),
-    Test("[^\\n]+", "abcd\n", 1, 0, 4),
-    Test("[日本語]+", "日本語日本語", 1, 0, 18),
-    Test("日本語+", "日本語", 1, 0, 9),
-    Test("日本語+", "日本語語語語", 1, 0, 18),
-    Test("()", "", 1, 0, 0, 0, 0),
-    Test("(a)", "a", 1, 0, 1, 0, 1),
-    Test("(.)(.)", "日a", 1, 0, 4, 0, 3, 3, 4),
-    Test("(.*)", "", 1, 0, 0, 0, 0),
-    Test("(.*)", "abcd", 1, 0, 4, 0, 4),
-    Test("(..)(..)", "abcd", 1, 0, 4, 0, 2, 2, 4),
-    Test("(([^xyz]*)(d))", "abcd", 1, 0, 4, 0, 4, 0, 3, 3, 4),
-    Test("((a|b|c)*(d))", "abcd", 1, 0, 4, 0, 4, 2, 3, 3, 4),
-    Test("(((a|b|c)*)(d))", "abcd", 1, 0, 4, 0, 4, 0, 3, 2, 3, 3, 4),
-    Test("\\a\\f\\n\\r\\t\\v", "\007\f\n\r\t\013", 1, 0, 6),
-    Test("[\\a\\f\\n\\r\\t\\v]+", "\007\f\n\r\t\013", 1, 0, 6),
-    Test("a*(|(b))c*", "aacc", 1, 0, 4, 2, 2, -(1), -(1)),
-    Test("(.*).*", "ab", 1, 0, 2, 0, 2),
-    Test("[.]", ".", 1, 0, 1),
-    Test("/$", "/abc/", 1, 4, 5),
-    Test("/$", "/abc", 0), // multiple matches
-    Test(".", "abc", 3, 0, 1, 1, 2, 2, 3),
-    Test("(.)", "abc", 3, 0, 1, 0, 1, 1, 2, 1, 2, 2, 3, 2, 3),
-    Test(".(.)", "abcd", 2, 0, 2, 1, 2, 2, 4, 3, 4),
-    Test("ab*", "abbaab", 3, 0, 3, 3, 4, 4, 6),
-    Test("a(b*)", "abbaab", 3, 0, 3, 1, 3, 3, 4, 4, 4, 4, 6, 5, 6), // fixed bugs
-    Test("ab$", "cab", 1, 1, 3),
-    Test("axxb$", "axxcb", 0),
-    Test("data", "daXY data", 1, 5, 9),
-    Test("da(.)a$", "daXY data", 1, 5, 9, 7, 8),
-    Test("zx+", "zzx", 1, 1, 3),
-    Test("ab$", "abcab", 1, 3, 5),
-    Test("(aa)*$", "a", 1, 1, 1, -(1), -(1)),
-    Test("(?:.|(?:.a))", "", 0),
-    Test("(?:A(?:A|a))", "Aa", 1, 0, 2),
-    Test("(?:A|(?:A|a))", "a", 1, 0, 1),
-    Test("(a){0}", "", 1, 0, 0, -(1), -(1)),
-    Test("(?-s)(?:(?:^).)", "\n", 0),
-    Test("(?s)(?:(?:^).)", "\n", 1, 0, 1),
-    Test("(?:(?:^).)", "\n", 0),
-    Test("\\b", "x", 2, 0, 0, 1, 1),
-    Test("\\b", "xx", 2, 0, 0, 2, 2),
-    Test("\\b", "x y", 4, 0, 0, 1, 1, 2, 2, 3, 3),
-    Test("\\b", "xx yy", 4, 0, 0, 2, 2, 3, 3, 5, 5),
-    Test("\\B", "x", 0),
-    Test("\\B", "xx", 1, 1, 1),
-    Test("\\B", "x y", 0),
-    Test("\\B", "xx yy", 2, 1, 1, 4, 4), // RE2 tests
-    Test("[^\\S\\s]", "abcd", 0),
-    Test("[^\\S[:space:]]", "abcd", 0),
-    Test("[^\\D\\d]", "abcd", 0),
-    Test("[^\\D[:digit:]]", "abcd", 0),
-    Test("(?i)\\W", "x", 0),
-    Test("(?i)\\W", "k", 0),
-    Test("(?i)\\W", "s", 0), // can backslash-escape any punctuation
-    Test(
-      "\\!\\\"\\#\\$\\%\\&\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\{\\|\\}\\~",
-      "!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~",
-      1,
-      0,
-      31),
-    Test(
-      "[\\!\\\"\\#\\$\\%\\&\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\{\\|\\}\\~]+",
-      "!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~",
-      1,
-      0,
-      31),
-    Test("\\`", "`", 1, 0, 1),
-    Test("[\\`]+", "`", 1, 0, 1), // long set of matches
-    Test(
-      ".",
-      "qwertyuiopasdfghjklzxcvbnm1234567890",
-      36,
-      0,
-      1,
-      1,
-      2,
-      2,
-      3,
-      3,
-      4,
-      4,
-      5,
-      5,
-      6,
-      6,
-      7,
-      7,
-      8,
-      8,
-      9,
-      9,
-      10,
-      10,
-      11,
-      11,
-      12,
-      12,
-      13,
-      13,
-      14,
-      14,
-      15,
-      15,
-      16,
-      16,
-      17,
-      17,
-      18,
-      18,
-      19,
-      19,
-      20,
-      20,
-      21,
-      21,
-      22,
-      22,
-      23,
-      23,
-      24,
-      24,
-      25,
-      25,
-      26,
-      26,
-      27,
-      27,
-      28,
-      28,
-      29,
-      29,
-      30,
-      30,
-      31,
-      31,
-      32,
-      32,
-      33,
-      33,
-      34,
-      34,
-      35,
-      35,
-      36
-    )
-  )
-
+  import FindSuite._
   // First the simple cases.
 
   test("FindUTF8") {
@@ -691,4 +486,210 @@ class FindSuite() extends FunSuite {
   }
 
   // The find_test.go benchmarks are ported to Benchmarks.java.
+}
+
+object FindSuite {
+  // For each pattern/text pair, what is the expected output of each
+  // function?  We can derive the textual results from the indexed
+  // results, the non-submatch results from the submatched results, the
+  // single results from the 'all' results, and the String results from
+  // the UTF-8 results. Therefore the table includes only the
+  // findAllUTF8SubmatchIndex result.
+  case class Test(pat: String, text: String, n: Int, _x: Int*) {
+    val x: Array[Int] = _x.toArray
+    // The n and x parameters construct a [][]int by extracting n
+    // sequences from x.  This represents n matches with len(x)/n
+    // submatches each.
+
+    val textUTF8: Array[Byte] = GoTestUtils.utf8(text)
+    // Each element is an even-length array of indices into textUTF8.  Not null.
+    val matches = new Array[Array[Int]](n)
+    if (n > 0) {
+      val runLength = x.length / n
+      var j         = 0
+      var i         = 0
+      while (i < n) {
+        matches(i) = new Array[Int](runLength)
+        System.arraycopy(x, j, matches(i), 0, runLength)
+        j += runLength
+        if (j > x.length) assert(false, "invalid build entry")
+        i += 1
+      }
+    }
+
+    def submatchBytes(i: Int, j: Int) =
+      Utils.subarray(textUTF8, matches(i)(2 * j), matches(i)(2 * j + 1))
+
+    def submatchString(i: Int, j: Int) =
+      GoTestUtils.fromUTF8(submatchBytes(i, j)) // yikes
+
+    override def toString: String = "pat=%s text=%s".format(pat, text)
+  }
+  // Used by RE2Test also.
+  val FIND_TESTS: Array[Test] = Array(
+    Test("", "", 1, 0, 0),
+    Test("^abcdefg", "abcdefg", 1, 0, 7),
+    Test("a+", "baaab", 1, 1, 4),
+    Test("abcd..", "abcdef", 1, 0, 6),
+    Test("a", "a", 1, 0, 1),
+    Test("x", "y", 0),
+    Test("b", "abc", 1, 1, 2),
+    Test(".", "a", 1, 0, 1),
+    Test(".*", "abcdef", 1, 0, 6),
+    Test("^", "abcde", 1, 0, 0),
+    Test("$", "abcde", 1, 5, 5),
+    Test("^abcd$", "abcd", 1, 0, 4),
+    Test("^bcd'", "abcdef", 0),
+    Test("^abcd$", "abcde", 0),
+    Test("a+", "baaab", 1, 1, 4),
+    Test("a*", "baaab", 3, 0, 0, 1, 4, 5, 5),
+    Test("[a-z]+", "abcd", 1, 0, 4),
+    Test("[^a-z]+", "ab1234cd", 1, 2, 6),
+    Test("[a\\-\\]z]+", "az]-bcz", 2, 0, 4, 6, 7),
+    Test("[^\\n]+", "abcd\n", 1, 0, 4),
+    Test("[日本語]+", "日本語日本語", 1, 0, 18),
+    Test("日本語+", "日本語", 1, 0, 9),
+    Test("日本語+", "日本語語語語", 1, 0, 18),
+    Test("()", "", 1, 0, 0, 0, 0),
+    Test("(a)", "a", 1, 0, 1, 0, 1),
+    Test("(.)(.)", "日a", 1, 0, 4, 0, 3, 3, 4),
+    Test("(.*)", "", 1, 0, 0, 0, 0),
+    Test("(.*)", "abcd", 1, 0, 4, 0, 4),
+    Test("(..)(..)", "abcd", 1, 0, 4, 0, 2, 2, 4),
+    Test("(([^xyz]*)(d))", "abcd", 1, 0, 4, 0, 4, 0, 3, 3, 4),
+    Test("((a|b|c)*(d))", "abcd", 1, 0, 4, 0, 4, 2, 3, 3, 4),
+    Test("(((a|b|c)*)(d))", "abcd", 1, 0, 4, 0, 4, 0, 3, 2, 3, 3, 4),
+    Test("\\a\\f\\n\\r\\t\\v", "\007\f\n\r\t\013", 1, 0, 6),
+    Test("[\\a\\f\\n\\r\\t\\v]+", "\007\f\n\r\t\013", 1, 0, 6),
+    Test("a*(|(b))c*", "aacc", 1, 0, 4, 2, 2, -(1), -(1)),
+    Test("(.*).*", "ab", 1, 0, 2, 0, 2),
+    Test("[.]", ".", 1, 0, 1),
+    Test("/$", "/abc/", 1, 4, 5),
+    Test("/$", "/abc", 0), // multiple matches
+    Test(".", "abc", 3, 0, 1, 1, 2, 2, 3),
+    Test("(.)", "abc", 3, 0, 1, 0, 1, 1, 2, 1, 2, 2, 3, 2, 3),
+    Test(".(.)", "abcd", 2, 0, 2, 1, 2, 2, 4, 3, 4),
+    Test("ab*", "abbaab", 3, 0, 3, 3, 4, 4, 6),
+    Test("a(b*)", "abbaab", 3, 0, 3, 1, 3, 3, 4, 4, 4, 4, 6, 5, 6), // fixed bugs
+    Test("ab$", "cab", 1, 1, 3),
+    Test("axxb$", "axxcb", 0),
+    Test("data", "daXY data", 1, 5, 9),
+    Test("da(.)a$", "daXY data", 1, 5, 9, 7, 8),
+    Test("zx+", "zzx", 1, 1, 3),
+    Test("ab$", "abcab", 1, 3, 5),
+    Test("(aa)*$", "a", 1, 1, 1, -(1), -(1)),
+    Test("(?:.|(?:.a))", "", 0),
+    Test("(?:A(?:A|a))", "Aa", 1, 0, 2),
+    Test("(?:A|(?:A|a))", "a", 1, 0, 1),
+    Test("(a){0}", "", 1, 0, 0, -(1), -(1)),
+    Test("(?-s)(?:(?:^).)", "\n", 0),
+    Test("(?s)(?:(?:^).)", "\n", 1, 0, 1),
+    Test("(?:(?:^).)", "\n", 0),
+    Test("\\b", "x", 2, 0, 0, 1, 1),
+    Test("\\b", "xx", 2, 0, 0, 2, 2),
+    Test("\\b", "x y", 4, 0, 0, 1, 1, 2, 2, 3, 3),
+    Test("\\b", "xx yy", 4, 0, 0, 2, 2, 3, 3, 5, 5),
+    Test("\\B", "x", 0),
+    Test("\\B", "xx", 1, 1, 1),
+    Test("\\B", "x y", 0),
+    Test("\\B", "xx yy", 2, 1, 1, 4, 4), // RE2 tests
+    Test("[^\\S\\s]", "abcd", 0),
+    Test("[^\\S[:space:]]", "abcd", 0),
+    Test("[^\\D\\d]", "abcd", 0),
+    Test("[^\\D[:digit:]]", "abcd", 0),
+    Test("(?i)\\W", "x", 0),
+    Test("(?i)\\W", "k", 0),
+    Test("(?i)\\W", "s", 0), // can backslash-escape any punctuation
+    Test(
+      "\\!\\\"\\#\\$\\%\\&\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\{\\|\\}\\~",
+      "!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~",
+      1,
+      0,
+      31),
+    Test(
+      "[\\!\\\"\\#\\$\\%\\&\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\{\\|\\}\\~]+",
+      "!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~",
+      1,
+      0,
+      31),
+    Test("\\`", "`", 1, 0, 1),
+    Test("[\\`]+", "`", 1, 0, 1), // long set of matches
+    Test(
+      ".",
+      "qwertyuiopasdfghjklzxcvbnm1234567890",
+      36,
+      0,
+      1,
+      1,
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+      5,
+      5,
+      6,
+      6,
+      7,
+      7,
+      8,
+      8,
+      9,
+      9,
+      10,
+      10,
+      11,
+      11,
+      12,
+      12,
+      13,
+      13,
+      14,
+      14,
+      15,
+      15,
+      16,
+      16,
+      17,
+      17,
+      18,
+      18,
+      19,
+      19,
+      20,
+      20,
+      21,
+      21,
+      22,
+      22,
+      23,
+      23,
+      24,
+      24,
+      25,
+      25,
+      26,
+      26,
+      27,
+      27,
+      28,
+      28,
+      29,
+      29,
+      30,
+      30,
+      31,
+      31,
+      32,
+      32,
+      33,
+      33,
+      34,
+      34,
+      35,
+      35,
+      36
+    )
+  )
 }
