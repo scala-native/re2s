@@ -60,11 +60,11 @@ class ExecTest() extends FunSuite {
     assert(Array("coba", "b").deep == x.get(1).deep)
   }
 
-  ignore("RE2Search") { // 1832pass/28failed
+  test("RE2Search") { // 1832pass/20failed
     testRE2("re2-search.txt")
   }
 
-  ignore("RE2Exhaustive") { // >100failed
+  test("RE2Exhaustive") { // >100failed
     testRE2("re2-exhaustive.txt.gz") // takes about 30s
   }
 
@@ -130,17 +130,15 @@ class ExecTest() extends FunSuite {
             catch {
               case e: Throwable =>
                 // (handle compiler panic too)
-                if (e.getMessage == "error parsing regexp: invalid escape sequence: `\\C`") { // We don't and likely never will support \C; keep going.
+                if (e.getMessage.startsWith("Illegal/unsupported escape sequence")) { // We don't and likely never will support \C; keep going.
                   continue = true
                 }
                 if (!continue) {
                   System.err.println(
                     "%s:%d: compile %s: %s\n"
                       .format(file, lineno, q, e.getMessage))
-                  if ({
-                    nfail += 1;
-                    nfail
-                  } >= 100) fail("stopping after " + nfail + " errors")
+                  nfail += 1
+                  if (nfail >= 100) fail("stopping after " + nfail + " errors")
                   continue = true
                 }
             }
@@ -182,9 +180,7 @@ class ExecTest() extends FunSuite {
                   "%s:%d: have %d test results, want %d"
                     .format(file, lineno, res.length, 4))
               var i = 0
-              while ({
-                i < 4
-              }) {
+              while (i < 4) {
                 val partial = (i & 1) != 0
                 val longest = (i & 2) != 0
                 val regexp =
@@ -208,10 +204,8 @@ class ExecTest() extends FunSuite {
                               text,
                               util.Arrays.toString(have),
                               util.Arrays.toString(want)))
-                  if ({
-                    nfail += 1;
-                    nfail
-                  } >= 100) fail("stopping after " + nfail + " errors")
+                  nfail += 1
+                  if (nfail >= 100) fail("stopping after " + nfail + " errors")
                   continue = true
                 }
                 if (!continue) {
@@ -228,10 +222,8 @@ class ExecTest() extends FunSuite {
                                 text,
                                 b,
                                 !b))
-                    if ({
-                      nfail += 1;
-                      nfail
-                    } >= 100) fail("stopping after " + nfail + " errors")
+                    nfail += 1
+                    if (nfail >= 100) fail("stopping after " + nfail + " errors")
                     continue = true
                   }
 
