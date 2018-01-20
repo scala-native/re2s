@@ -696,7 +696,7 @@ object RE2 {
   // Treat pattern as a literal string instead of a regexp.
   final val LITERAL = 0x02
 
-  // Allow character classes like [^a-z] and [[:space:]] to match newline.
+  // Allow character classes like [^a-z] and \\p{Space} to match newline.
   final val CLASS_NL = 0x04
 
   // Allow '.' to match newline.

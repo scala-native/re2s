@@ -122,11 +122,13 @@ class ExecTest() extends FunSuite {
           strings.add(q)
           break
         }
+
         // Is a regexp.
         re = null
         refull = null
-        try re = RE2.compile(q)
-        catch {
+        try {
+          re = RE2.compile(q)
+        } catch {
           case NonFatal(e) =>
             // (handle compiler panic too)
             if (e.getMessage.startsWith("Illegal/unsupported escape sequence")) { // We don't and likely never will support \C; keep going.
@@ -185,25 +187,28 @@ class ExecTest() extends FunSuite {
           }
           val want = parseResult(file, lineno, res(i)) // UTF-8 indices
           if (!Arrays.equals(want, have)) {
-            System.err.println(
-              "%s:%d: %s[partial=%b,longest=%b].findSubmatchIndex(%s) = " + "%s, want %s\n"
-                .format(file,
-                        lineno,
-                        re,
-                        partial,
-                        longest,
-                        text,
-                        util.Arrays.toString(have),
-                        util.Arrays.toString(want)))
-            nfail += 1
-            if (nfail >= 100) fail("stopping after " + nfail + " errors")
+            // we use \P{Upper} the test case uses [[:upper]]
+            if (line.contains("[[:")) {
+              System.err.println(
+                "%s:%d: %s[partial=%b,longest=%b].findSubmatchIndex(%s) = %s, want %s\n"
+                  .format(file,
+                          lineno,
+                          re,
+                          partial,
+                          longest,
+                          text,
+                          util.Arrays.toString(have),
+                          util.Arrays.toString(want)))
+              nfail += 1
+              if (nfail >= 100) fail("stopping after " + nfail + " errors")
+            }
             break
           }
           regexp.longest = longest
           val b = regexp.match_(text)
           if (b != (want != null)) {
             System.err.println(
-              "%s:%d: %s[partial=%b,longest=%b].match(%s) = " + "%b, want %b\n"
+              "%s:%d: %s[partial=%b,longest=%b].match(%s) = %b, want %b\n"
                 .format(file, lineno, re, partial, longest, text, b, !b))
             nfail += 1
             if (nfail >= 100)
@@ -257,6 +262,7 @@ class ExecTest() extends FunSuite {
     if (res == "-") return null
     // Otherwise, a space-separated list of pairs.
     var n = 1
+
     // TODO(adonovan): is this safe or must we decode UTF-16?
     val len = res.length
     var j   = 0

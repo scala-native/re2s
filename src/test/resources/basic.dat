@@ -54,9 +54,9 @@ BE	[a-]*			--a		(0,3)
 BE	[a-m-]*			--amoma--	(0,4)
 E	:::1:::0:|:::1:1:0:	:::0:::1:::1:::0:	(8,17)
 E	:::1:::0:|:::1:1:1:	:::0:::1:::1:::0:	(8,17)
-{E	[[:upper:]]		A		(0,1)	[[<element>]] not supported
-E	[[:lower:]]+		`az{		(1,3)
-E	[[:upper:]]+		@AZ[		(1,3)
+{E	\\p{Upper}		A		(0,1)	[[<element>]] not supported
+E	\\p{Lower}+		`az{		(1,3)
+E	\\p{Upper}+		@AZ[		(1,3)
 # No collation in Go
 #BE	[[-]]			[[-]]		(2,4)
 #BE	[[.NIL.]]	NULL	ECOLLATE

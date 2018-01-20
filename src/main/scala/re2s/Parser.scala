@@ -1114,10 +1114,14 @@ class Parser(wholeRegexp: String, _flags: Int) {
         true
       }
       case None => {
-        val prefixUnicode = name.substring(0, 2) // Is | In
 
-        val isBlock                  = prefixUnicode == "In"
-        val isScriptOrBinaryProperty = prefixUnicode == "Is"
+        val (isBlock, isScriptOrBinaryProperty) =
+          if (name.length > 2) {
+            val prefixUnicode = name.substring(0, 2) // Is | In
+            (prefixUnicode == "In", prefixUnicode == "Is")
+          } else {
+            (false, false)
+          }
 
         val name2 =
           if (isBlock || isScriptOrBinaryProperty) {
