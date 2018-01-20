@@ -7,6 +7,8 @@ import java.util.{Arrays, Collections}
 
 import org.scalatest.FunSuite
 
+import scala.util.control.NonFatal
+
 // TestRE2 tests this package's regexp API against test cases
 // considered during (C++) RE2's exhaustive tests, which run all possible
 // regexps over a given set of atoms and operators, up to a given
@@ -93,11 +95,10 @@ class ExecTest() extends FunSuite {
       if (line.isEmpty)
         fail("%s:%d: unexpected blank line".format(file, lineno))
       val first = line.charAt(0)
-      if (first == '#') continue = true //todo: continue is not supported
+      if (first == '#') continue = true
       if (!continue) {
         if ('A' <= first && first <= 'Z') { // Test name.
           System.err.println(line)
-//          continue //todo: continue is not supported
         } else if (line == "strings") {
           if (input < strings.size)
             fail(
@@ -110,7 +111,7 @@ class ExecTest() extends FunSuite {
           var q: String = null
           try q = Strconv.unquote(line)
           catch {
-            case e: Exception =>
+            case NonFatal(e) =>
               // Fatal because we'll get out of sync.
               fail(
                 "%s:%d: unquote %s: %s"
@@ -128,7 +129,7 @@ class ExecTest() extends FunSuite {
             refull = null
             try re = RE2.compile(q)
             catch {
-              case e: Throwable =>
+              case NonFatal(e) =>
                 // (handle compiler panic too)
                 if (e.getMessage.startsWith(
                       "Illegal/unsupported escape sequence")) { // We don't and likely never will support \C; keep going.
@@ -147,7 +148,7 @@ class ExecTest() extends FunSuite {
               val full = "\\A(?:" + q + ")\\z"
               try refull = RE2.compile(full)
               catch {
-                case e: Throwable =>
+                case NonFatal(e) =>
                   // Fatal because q worked, so this should always work.
                   fail(
                     "%s:%d: compile full %s: %s"
@@ -457,12 +458,12 @@ class ExecTest() extends FunSuite {
                 // Ignore all the control operators.
                 // Just run everything.
                 flag = flag.substring(1)
-                if (flag.isEmpty) continue = true //todo: continue is not supported
+                if (flag.isEmpty) continue = true
               case ':' =>
                 val i = flag.indexOf(':', 1)
                 if (i < 0) {
                   System.err.format("skip: %s\n", line)
-                  continue = true //todo: continue is not supported
+                  continue = true
                 }
                 if (!continue) flag = flag.substring(1 + i + 1)
 
@@ -487,7 +488,7 @@ class ExecTest() extends FunSuite {
                   var f = "\"" + field.get(1) + "\""
                   try field.set(1, Strconv.unquote(f))
                   catch {
-                    case e: Exception =>
+                    case NonFatal(e) =>
                       System.err.println(
                         "%s:%d: cannot unquote %s\n".format(file, lineno, f))
                       nerr += 1
@@ -495,7 +496,7 @@ class ExecTest() extends FunSuite {
                   f = "\"" + field.get(2) + "\""
                   try field.set(2, Strconv.unquote(f))
                   catch {
-                    case e: Exception =>
+                    case NonFatal(e) =>
                       System.err.println(
                         "%s:%d: cannot unquote %s\n".format(file, lineno, f))
                       nerr += 1
@@ -513,7 +514,7 @@ class ExecTest() extends FunSuite {
                 var pos: util.List[Integer] = null
                 try pos = parseFowlerResult(field.get(3), shouldCompileMatch)
                 catch {
-                  case e: Exception =>
+                  case NonFatal(e) =>
                     System.err.println(
                       "%s:%d: cannot parse result %s\n"
                         .format(file, lineno, field.get(3)))

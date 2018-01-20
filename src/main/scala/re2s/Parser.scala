@@ -5,10 +5,6 @@
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/parse.go
 
-// TODO(adonovan):
-// - Eliminate allocations (new int[], new Regexp[], new ArrayList) by
-//   recycling old arrays on a freelist.
-
 package re2s
 
 import java.util.ArrayList

@@ -35,7 +35,6 @@ object GoTestUtils {
   // Convert |idx16|, which are Java (UTF-16) string indices, into the
   // corresponding indices in the UTF-8 encoding of |text|.
   //
-  // TODO(adonovan): eliminate duplication w.r.t. ExecTest.
   def utf16IndicesToUtf8(idx16: Array[Int], text: String): Array[Int] =
     try {
       val idx8 = new Array[Int](idx16.length)

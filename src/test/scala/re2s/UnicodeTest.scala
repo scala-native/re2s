@@ -19,15 +19,4 @@ class UnicodeTest() extends FunSuite {
     if (Unicode.MAX_FOLD != last)
       fail("MAX_FOLD=%#U should be %#U".format(Unicode.MAX_FOLD, last))
   }
-
-  // TODO(adonovan): tests for:
-  //
-  // boolean isUpper(int r);
-  // boolean isLower(int r);
-  // boolean isTitle(int r);
-  // boolean isPrint(int r);
-  // int to(int _case, int r, int[][] caseRange);
-  // int toUpper(int r);
-  // int toLower(int r);
-  // int simpleFold(int r);
 }
