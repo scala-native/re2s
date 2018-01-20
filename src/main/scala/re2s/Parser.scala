@@ -1051,12 +1051,12 @@ class Parser(wholeRegexp: String, _flags: Int) {
       return false
     }
     t.pop() // e.g. advance past 'd' in "\\d"
-    val g = CharGroup.PERL_GROUPS.get(t.from(beforePos))
-    if (g == null) {
-      return false
+    CharGroup.PERL_GROUPS.get(t.from(beforePos)) match {
+      case Some(v) =>
+        cc.appendGroup(v, (flags & RE2.FOLD_CASE) != 0)
+        true
+      case _ => false
     }
-    cc.appendGroup(g, (flags & RE2.FOLD_CASE) != 0)
-    return true
   }
 
   // parseNamedClass parses a leading POSIX named character class like
@@ -1070,18 +1070,23 @@ class Parser(wholeRegexp: String, _flags: Int) {
     val cls = t.rest()
     val i   = cls.indexOf(":]")
     if (i < 0) {
-      return false
+      false
+    } else {
+      val name = cls.substring(0, i + 2) // "[:alnum:]"
+      t.skipString(name)
+
+      CharGroup.POSIX_GROUPS.get(name) match {
+        case Some(v) => {
+          cc.appendGroup(v, (flags & RE2.FOLD_CASE) != 0)
+          true
+        }
+        case None => {
+          throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
+                                           t.str,
+                                           t.pos() - 1)
+        }
+      }
     }
-    val name = cls.substring(0, i + 2) // "[:alnum:]"
-    t.skipString(name)
-    val g = CharGroup.POSIX_GROUPS.get(name)
-    if (g == null) {
-      throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
-                                       t.str,
-                                       t.pos() - 1)
-    }
-    cc.appendGroup(g, (flags & RE2.FOLD_CASE) != 0)
-    true
   }
 
   // parseUnicodeClass() parses a leading Unicode character class like \p{Han}
