@@ -142,7 +142,7 @@ class Regexp {
         if (name == null || name.isEmpty()) {
           out.append('(')
         } else {
-          out.append("(?P<")
+          out.append("(?<")
           out.append(name)
           out.append(">")
         }
@@ -231,6 +231,30 @@ class Regexp {
       }
     }
     m
+  }
+
+  def namedCaps(): Map[String, Int] = {
+    val groups = collection.mutable.Map[String, Int]()
+    def visit(re: Regexp): Unit = {
+      if (re.op == Op.CAPTURE && re.name != null) {
+        // Record first occurrence of each name.
+        // (The rule is that if you have the same name
+        // multiple times, only the leftmost one counts.)
+        if (!groups.contains(re.name)) {
+          groups += re.name -> re.cap
+        }
+      }
+
+      if (re.subs != null) {
+        var i = 0
+        while (i < re.subs.length) {
+          visit(re.subs(i))
+          i += 1
+        }
+      }
+    }
+    visit(this)
+    groups.toMap
   }
 
   // TODO: shallow copy shouldn't match, so removing equals

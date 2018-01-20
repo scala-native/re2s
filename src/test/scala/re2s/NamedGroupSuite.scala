@@ -2,10 +2,22 @@ package re2s
 
 import org.scalatest.FunSuite
 import TestUtils._
-
+import scala.util.Random
 
 class NamedGroupSuite() extends FunSuite {
-  test("named group (java syntax)") {
+
+  test("named group is stack safe") {
+    val buf                       = new StringBuffer()
+    var i                         = 0
+    def randomGroupName(): String = Random.alphanumeric.take(5).mkString("")
+    while (i < 20000) {
+      buf.append("(?<" + randomGroupName + ">test)")
+      i += 1
+    }
+    Pattern.compile(buf.toString())
+  }
+
+  test("named group") {
     val m = matcher(
       "from (?<S>.*) to (?<D>.*)",
       "from Montreal, Canada to Lausanne, Switzerland"
@@ -17,8 +29,7 @@ class NamedGroupSuite() extends FunSuite {
     assert(group("D") == "Lausanne, Switzerland")
   }
 
-  test("start(name)/end(name) java syntax") {
-    // change pattern to java: "from (?<S>.*) to (?<D>.*)"
+  test("start(name)/end(name)") {
     val m = matcher(
       "from (?<S>.*) to (?<D>.*)",
       "from Montreal, Canada to Lausanne, Switzerland"
@@ -33,8 +44,7 @@ class NamedGroupSuite() extends FunSuite {
     assert(end("D") == 46)
   }
 
-  test(
-    "appendReplacement/appendTail with group replacement by name") {
+  test("appendReplacement/appendTail with group replacement by name") {
     val buf = new StringBuffer()
     val m = matcher(
       "from (?<S>.*) to (?<D>.*)",
@@ -45,8 +55,25 @@ class NamedGroupSuite() extends FunSuite {
       appendReplacement(buf, "such ${S}, wow ${D}")
     }
     appendTail(buf)
-    assert(
-      buf.toString ==
-        "such Montreal, Canada, wow Lausanne, Switzerland")
+
+    val obtained = buf.toString
+    val expected = "such Montreal, Canada, wow Lausanne, Switzerland"
+
+    assert(obtained == expected)
+  }
+
+  test("appendReplacement unclosed }") {
+    val buf = new StringBuffer()
+    val m = matcher(
+      "from (?<S>.*) to (?<D>.*)",
+      "from Montreal, Canada to Lausanne, Switzerland"
+    )
+    import m._
+    find()
+    assertThrowsAnd[IllegalArgumentException](
+      appendReplacement(buf, "such open ${S such closed ${D}"))(
+      _.getMessage == "named capturing group is missing trailing '}'"
+    )
+
   }
 }

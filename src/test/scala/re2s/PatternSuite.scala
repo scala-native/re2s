@@ -205,13 +205,8 @@ class PatternSuite() extends FunSuite {
     pass("\\Qa|b|c\\E", "a|b|c")
   }
 
-  ignore("(Not supported) java named groups") {
-    pass("(?<foo>a)", "a") // (?<name> to (?P<name>
-    pending                // 620
-  }
-
-  test("re2 named groups") {
-    pass("(?P<foo>a)", "a")
+  test("named groups") {
+    pass("(?<foo>a)", "a")
   }
 
   test("non capturing groups") {
