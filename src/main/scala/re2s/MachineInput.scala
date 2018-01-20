@@ -221,7 +221,8 @@ object MachineInput {
       while (i <= max) {
         /* Look for first character. */
         if (hayStack.charAt(i) != first) {
-          while ({ i += 1; i } <= max && hayStack.charAt(i) != first) {}
+          i += 1
+          while (i <= max && hayStack.charAt(i) != first) { i += 1 }
         }
 
         /* Found first character, now look at the rest of v2 */

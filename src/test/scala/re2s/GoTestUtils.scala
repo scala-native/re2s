@@ -39,9 +39,7 @@ object GoTestUtils {
     try {
       val idx8 = new Array[Int](idx16.length)
       var i    = 0
-      while ({
-        i < idx16.length
-      }) {
+      while (i < idx16.length) {
         idx8(i) =
           if (idx16(i) == -1) -1
           else text.substring(0, idx16(i)).getBytes("UTF-8").length // yikes

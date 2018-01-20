@@ -54,9 +54,7 @@ object Strconv { // unquoteChar decodes the first character or byte in the escap
         }
         var v = 0
         var j = 0
-        while ({
-          j < n
-        }) {
+        while (j < n) {
           val d = s.codePointAt(i(0))
           i(0) = s.offsetByCodePoints(i(0), 1)
           val x = Utils.unhex(d)
@@ -76,9 +74,7 @@ object Strconv { // unquoteChar decodes the first character or byte in the escap
       case '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' =>
         var v = c - '0'
         var j = 0
-        while ({
-          j < 2
-        }) { // one digit already; two more
+        while (j < 2) { // one digit already; two more
           val d = s.codePointAt(i(0))
           i(0) = s.offsetByCodePoints(i(0), 1)
           val x = d - '0'

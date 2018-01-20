@@ -30,9 +30,7 @@ class ParserSuite() extends FunSuite {
     override def applies(r: Int): Boolean = {
       if (Unicode.isUpper(r)) return true
       var c = Unicode.simpleFold(r)
-      while ({
-        c != r
-      }) {
+      while (c != r) {
         if (Unicode.isUpper(c)) return true
 
         c = Unicode.simpleFold(c)
@@ -379,9 +377,7 @@ class ParserSuite() extends FunSuite {
       case CHAR_CLASS =>
         var sep = ""
         var i   = 0
-        while ({
-          i < re.runes.length
-        }) {
+        while (i < re.runes.length) {
           b.append(sep)
           sep = " "
           val lo = re.runes(i)
