@@ -240,7 +240,7 @@ class RE2MatcherSuite() extends FunSuite {
    */
   test("MatchEndUTF16") { // Latin alphabetic chars such as these 5 lower-case, acute vowels have multi-byte UTF-8
     // encodings but fit in a single UTF-16 code, so the final match is at UTF16 offset 5.
-    val vowels = "\225\233\237\243\250"
+    val vowels = "\u0095\u009b\u009f\u00a3\u00a8"
     helperTestMatchEndUTF16(vowels, 5, 5)
     // But surrogates are encoded as two UTF16 codes, so we should expect match
     // to get 6 rather than 3.

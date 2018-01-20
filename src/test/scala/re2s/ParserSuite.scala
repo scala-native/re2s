@@ -413,8 +413,8 @@ class ParserSuite() extends FunSuite {
     }
     re.runes = new Array[Int](runes.size)
     var j = 0
-    import scala.collection.JavaConversions._
-    for (i <- runes) {
+    import scala.collection.JavaConverters._
+    for (i <- runes.asScala) {
       re.runes(j) = i
       j += 1
     }

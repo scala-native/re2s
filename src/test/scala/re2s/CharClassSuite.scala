@@ -110,11 +110,11 @@ class CharClassSuite() extends FunSuite {
 
   test("NegateClass") {
     assertClass(cc(Array.emptyIntArray).negateClass,
-                Array('\0', Unicode.MAX_RUNE))
+                Array('\u0000', Unicode.MAX_RUNE))
     assertClass(cc(Array('A', 'Z')).negateClass,
-                Array('\0', '@', '[', Unicode.MAX_RUNE))
+                Array('\u0000', '@', '[', Unicode.MAX_RUNE))
     assertClass(cc(Array('A', 'Z', 'a', 'z')).negateClass,
-                Array('\0', '@', '[', '`', '{', Unicode.MAX_RUNE))
+                Array('\u0000', '@', '[', '`', '{', Unicode.MAX_RUNE))
   }
 
   test("AppendTable") {

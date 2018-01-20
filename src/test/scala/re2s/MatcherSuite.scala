@@ -53,34 +53,6 @@ class MatcherSuite() extends FunSuite {
     assert(!find())
   }
 
-  ignore("(Not supported) named group (re2 syntax)") {
-    // change pattern to java: "from (?<S>.*) to (?<D>.*)"
-    val m = matcher(
-      "from (?P<S>.*) to (?P<D>.*)",
-      "from Montreal, Canada to Lausanne, Switzerland"
-    )
-    import m._
-
-    assert(find())
-    assert(group("S") == "Montreal, Canada")
-    assert(group("D") == "Lausanne, Switzerland")
-    assertThrowsAnd[IllegalArgumentException](group("foo"))(
-      _.getMessage == "No group with name <foo>"
-    )
-  }
-
-  ignore("(Not supported) named group (java syntax)") { // 620
-    val m = matcher(
-      "from (?<S>.*) to (?<D>.*)",
-      "from Montreal, Canada to Lausanne, Switzerland"
-    )
-    import m._
-
-    assert(find())
-    assert(group("S") == "Montreal, Canada")
-    assert(group("D") == "Lausanne, Switzerland")
-  }
-
   test("start(i)/end(i)") {
     val m = matcher("a(\\d)(\\d)z", "012345_a12z_012345")
     import m._
@@ -131,45 +103,6 @@ class MatcherSuite() extends FunSuite {
     assert(!find())
   }
 
-  ignore("(Not Supported) start(name)/end(name) re2 syntax") {
-    val m = matcher(
-      "from (?P<S>.*) to (?P<D>.*)",
-      "from Montreal, Canada to Lausanne, Switzerland"
-    )
-    import m._
-
-    assert(find())
-    assert(start("S") == 5)
-    assert(end("S") == 21)
-
-    assert(start("D") == 25)
-    assert(end("D") == 46)
-
-    assertThrowsAnd[IllegalArgumentException](start("foo"))(
-      _.getMessage == "No group with name <foo>"
-    )
-
-    assertThrowsAnd[IllegalArgumentException](end("foo"))(
-      _.getMessage == "No group with name <foo>"
-    )
-  }
-
-  ignore("(Not Supported) start(name)/end(name) java syntax") { // 620
-    // change pattern to java: "from (?<S>.*) to (?<D>.*)"
-    val m = matcher(
-      "from (?<S>.*) to (?<D>.*)",
-      "from Montreal, Canada to Lausanne, Switzerland"
-    )
-    import m._
-
-    assert(find())
-    assert(start("S") == 5)
-    assert(end("S") == 21)
-
-    assert(start("D") == 25)
-    assert(end("D") == 46)
-  }
-
   test("appendReplacement/appendTail") {
     val buf = new StringBuffer()
 
@@ -192,23 +125,6 @@ class MatcherSuite() extends FunSuite {
     }
     appendTail(buf)
     assert(buf.toString == "_{a12z}_{a34z}_")
-  }
-
-  ignore(
-    "(Not Supported) appendReplacement/appendTail with group replacement by name") {
-    val buf = new StringBuffer()
-    val m = matcher(
-      "from (?P<S>.*) to (?P<D>.*)",
-      "from Montreal, Canada to Lausanne, Switzerland"
-    )
-    import m._
-    while (find()) {
-      appendReplacement(buf, "such ${S}, wow ${D}")
-    }
-    appendTail(buf)
-    assert(
-      buf.toString ==
-        "such Montreal, Canada, wow Lausanne, Switzerland")
   }
 
   test("reset") {
@@ -277,7 +193,4 @@ class MatcherSuite() extends FunSuite {
     assert(decStr == "000000")
     assert(expStr == null)
   }
-
-  private def matcher(regex: String, text: String): Matcher =
-    Pattern.compile(regex).matcher(text)
 }
