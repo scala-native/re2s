@@ -1114,12 +1114,25 @@ class Parser(wholeRegexp: String, _flags: Int) {
         true
       }
       case None => {
-        val pair = unicodeTable(name)
+        val prefixUnicode = name.substring(0, 2) // Is | In
+
+        val isBlock                  = prefixUnicode == "In"
+        val isScriptOrBinaryProperty = prefixUnicode == "Is"
+
+        val name2 =
+          if (isBlock || isScriptOrBinaryProperty) {
+            name.substring(2, name.length)
+          } else {
+            name
+          }
+
+        val pair = unicodeTable(name2)
+
         if (pair == null) {
-          println(name)
-          throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
-                                           t.str,
-                                           t.pos() - 1)
+          throw new PatternSyntaxException(
+            s"Unknown character block name {$name2}",
+            t.str,
+            t.pos() - 1)
         }
         val tab  = pair.first
         val fold = pair.second // fold-equivalent table

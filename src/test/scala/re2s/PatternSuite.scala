@@ -86,17 +86,25 @@ class PatternSuite() extends FunSuite {
   }
 
   test("unicode classes") {
+    // Categories
     pass("\\p{Lu}", "A")
     pass("\\p{Sc}", "$")
+
+    // Blocks
+    pass("\\p{InGreek}", "α")
+
+    // Scripts
+    pass("\\p{IsLatin}", "a")
+    fail("\\p{IsLatin}", "α")
   }
 
-  ignore("(not supported) unicode classes") {
-    // Needs to convert to
-    pass("\\p{InGreek}", "α") // p{Latin}
-    pass("\\p{IsLatin}", "a") // p{Greek}
-    fail("\\p{IsLatin}", "α")
+  ignore("pending") {
+    // The prefix In should only allow blokcs like Mongolian
+    assertThrowsAnd[PatternSyntaxException](Pattern.compile("\\p{InLatin}"))(
+      _.getMessage == "Unknown character block name {Latin} near index 10"
+    )
 
-    // not supported
+    // Binary Properties
     pass("\\p{IsAlphabetic}", "a")
     fail("\\p{IsAlphabetic}", "-")
   }
