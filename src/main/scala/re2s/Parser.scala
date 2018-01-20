@@ -5,10 +5,6 @@
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/parse.go
 
-// TODO(adonovan):
-// - Eliminate allocations (new int[], new Regexp[], new ArrayList) by
-//   recycling old arrays on a freelist.
-
 package re2s
 
 import java.util.ArrayList
@@ -1584,11 +1580,26 @@ object Parser {
 
     (c: @scala.annotation.switch) match {
       // Octal escapes.
-      case '1' | '2' | '3' | '4' | '5' | '6' | '7'
-          // Single non-zero digit is a backreference not supported
-          if !t.more() || t.peek() < '0' || t.peek() > '7' =>
-        invalidEscape
-
+      case '1' | '2' | '3' | '4' | '5' | '6' | '7' =>
+        // Single non-zero digit is a backreference not supported
+        if (!t.more() || t.peek() < '0' || t.peek() > '7') {
+          invalidEscape
+        } else {
+          /* fallthrough */
+          var r          = c - '0'
+          var i          = 1
+          var breakInner = false
+          while (i < 3 && !breakInner) {
+            if (!t.more() || t.peek() < '0' || t.peek() > '7') {
+              breakInner = true
+            } else {
+              r = r * 8 + t.peek() - '0'
+              t.skip(1) // digit
+              i += 1
+            }
+          }
+          r
+        }
       // Consume up to three octal digits already have one.
       case '0' =>
         var r          = c - '0'

@@ -141,7 +141,8 @@ object Utils {
     while (i <= max) {
       // Look for first byte.
       if (source(i) != first) {
-        while ({ i += 1; i } <= max && source(i) != first) {}
+        i += 1
+        while (i <= max && source(i) != first) { i += 1 }
       }
 
       // Found first byte, now look at the rest of v2.

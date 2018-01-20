@@ -228,9 +228,7 @@ class RE2MatcherSuite() extends FunSuite {
     val pat   = new Pattern(pattern, 0, re)
     val m     = pat.matcher(string)
     var found = 0
-    while ({
-      m.find
-    }) found += 1
+    while (m.find) found += 1
     assert(
       num == found,
       "Matches Expected " + num + " but found " + found + ", for input " + string)
@@ -259,9 +257,7 @@ class RE2MatcherSuite() extends FunSuite {
     val p  = Pattern.compile("cat")
     val m  = p.matcher("one cat two cats in the yard")
     val sb = new StringBuffer
-    while ({
-      m.find
-    }) m.appendReplacement(sb, "dog")
+    while (m.find) m.appendReplacement(sb, "dog")
     m.appendTail(sb)
     m.appendTail(sb)
     assert("one dog two dogs in the yards in the yard" == sb.toString)

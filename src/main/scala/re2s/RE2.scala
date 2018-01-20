@@ -814,6 +814,11 @@ object RE2 {
   def match_(pattern: String, s: CharSequence) =
     compile(pattern).match_(s)
 
+  // This is visible for testing.
+  trait ReplaceFunc {
+    def replace(orig: String): String = ???
+  }
+
   /**
    * Returns a string that quotes all regular expression metacharacters
    * inside the argument text the returned string is a regular

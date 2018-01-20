@@ -35,7 +35,6 @@ object Unicode {
 
   // is32 uses binary search to test whether rune is in the specified
   // slice of 32-bit ranges.
-  // TODO(adonovan): opt: consider using int[n*3] instead of int[n][3].
   private def is32(ranges: Array[Array[Int]], r: Int): Boolean = {
     // binary search over ranges
     var lo = 0

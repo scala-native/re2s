@@ -143,6 +143,7 @@ object Inst {
     while (i < runes.length) {
       val rune = runes(i)
       Utils.escapeRune(out, rune)
+      i += 1
     }
     out.append('"')
     out.toString
