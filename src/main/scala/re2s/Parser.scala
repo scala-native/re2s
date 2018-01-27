@@ -1051,37 +1051,12 @@ class Parser(wholeRegexp: String, _flags: Int) {
       return false
     }
     t.pop() // e.g. advance past 'd' in "\\d"
-    val g = CharGroup.PERL_GROUPS.get(t.from(beforePos))
-    if (g == null) {
-      return false
+    CharGroup.PERL_GROUPS.get(t.from(beforePos)) match {
+      case Some(v) =>
+        cc.appendGroup(v, (flags & RE2.FOLD_CASE) != 0)
+        true
+      case _ => false
     }
-    cc.appendGroup(g, (flags & RE2.FOLD_CASE) != 0)
-    return true
-  }
-
-  // parseNamedClass parses a leading POSIX named character class like
-  // [:alnum:] from the beginning of t.  If one is present, it appends the
-  // characters to cc, advances the iterator, and returns true.
-  // Pre: t at "[:".  Post: t after ":]".
-  // On failure (no class of than name), throws PatternSyntaxException.
-  // On misparse, returns false t.pos() is undefined.
-  private def parseNamedClass(t: StringIterator, cc: CharClass): Boolean = {
-    // (Go precondition check deleted.)
-    val cls = t.rest()
-    val i   = cls.indexOf(":]")
-    if (i < 0) {
-      return false
-    }
-    val name = cls.substring(0, i + 2) // "[:alnum:]"
-    t.skipString(name)
-    val g = CharGroup.POSIX_GROUPS.get(name)
-    if (g == null) {
-      throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
-                                       t.str,
-                                       t.pos() - 1)
-    }
-    cc.appendGroup(g, (flags & RE2.FOLD_CASE) != 0)
-    true
   }
 
   // parseUnicodeClass() parses a leading Unicode character class like \p{Han}
@@ -1133,30 +1108,57 @@ class Parser(wholeRegexp: String, _flags: Int) {
       name = name.substring(1)
     }
 
-    val pair = unicodeTable(name)
-    if (pair == null) {
-      throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE,
-                                       t.str,
-                                       t.pos() - 1)
-    }
-    val tab  = pair.first
-    val fold = pair.second // fold-equivalent table
+    CharGroup.POSIX_GROUPS.get(name) match {
+      case Some(v) => {
+        cc.appendGroup(v, (flags & RE2.FOLD_CASE) != 0)
+        true
+      }
+      case None => {
 
-    // Variation of CharClass.appendGroup() for tables.
-    if ((flags & RE2.FOLD_CASE) == 0 || fold == null) {
-      cc.appendTableWithSign(tab, sign)
-    } else {
-      // Merge and clean tab and fold in a temporary buffer.
-      // This is necessary for the negative case and just tidy
-      // for the positive case.
-      val tmp = new CharClass()
-        .appendTable(tab)
-        .appendTable(fold)
-        .cleanClass()
-        .toArray()
-      cc.appendClassWithSign(tmp, sign)
+        val (isBlock, isScriptOrBinaryProperty) =
+          if (name.length > 2) {
+            val prefixUnicode = name.substring(0, 2) // Is | In
+            (prefixUnicode == "In", prefixUnicode == "Is")
+          } else {
+            (false, false)
+          }
+
+        val name2 =
+          if (isBlock || isScriptOrBinaryProperty) {
+            name.substring(2, name.length)
+          } else {
+            name
+          }
+
+        val pair = unicodeTable(name2)
+
+        if (pair == null) {
+          throw new PatternSyntaxException(
+            s"Unknown character block name {$name2}",
+            t.str,
+            t.pos() - 1)
+        }
+        val tab  = pair.first
+        val fold = pair.second // fold-equivalent table
+
+        // Variation of CharClass.appendGroup() for tables.
+        if ((flags & RE2.FOLD_CASE) == 0 || fold == null) {
+          cc.appendTableWithSign(tab, sign)
+        } else {
+          // Merge and clean tab and fold in a temporary buffer.
+          // This is necessary for the negative case and just tidy
+          // for the positive case.
+          val tmp = new CharClass()
+            .appendTable(tab)
+            .appendTable(fold)
+            .cleanClass()
+            .toArray()
+          cc.appendClassWithSign(tmp, sign)
+        }
+        return true
+      }
     }
-    return true
+
   }
 
   // parseClass parses a character class and pushes it onto the parse stack.
@@ -1203,16 +1205,6 @@ class Parser(wholeRegexp: String, _flags: Int) {
       first = false
 
       val beforePos = t.pos()
-
-      // Look for POSIX [:alnum:] etc.
-      if (t.lookingAt("[:")) {
-        if (parseNamedClass(t, cc)) {
-          continue = true
-        }
-        if (!continue) {
-          t.rewindTo(beforePos)
-        }
-      }
 
       if (!continue) {
         // Look for Unicode character group like \p{Han}.

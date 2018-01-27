@@ -133,10 +133,10 @@ class CharClassSuite() extends FunSuite {
 
   test("AppendGroup") {
     assertClass(cc(Array.emptyIntArray)
-                  .appendGroup(CharGroup.PERL_GROUPS.get("\\d"), false),
+                  .appendGroup(CharGroup.PERL_GROUPS("\\d"), false),
                 Array('0', '9'))
     assertClass(cc(Array.emptyIntArray)
-                  .appendGroup(CharGroup.PERL_GROUPS.get("\\D"), false),
+                  .appendGroup(CharGroup.PERL_GROUPS("\\D"), false),
                 Array(0, '/', ':', Unicode.MAX_RUNE))
   }
 

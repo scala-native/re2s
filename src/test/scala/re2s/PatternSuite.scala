@@ -1,6 +1,7 @@
 package re2s
 
 import org.scalatest.FunSuite
+import org.scalactic.source.Position
 import TestUtils._
 
 class PatternSuite() extends FunSuite {
@@ -68,35 +69,42 @@ class PatternSuite() extends FunSuite {
     pass("\\W", "-")
   }
 
-  ignore("(not supported) POSIX character classes") {
-    // Needs to convert to
-    pass("\\p{Alnum}", "a")     // [[:alpha:]]
-    pass("\\p{Alpha}", "a")     // [[:alnum:]]
-    pass("\\p{ASCII}", "a")     // [[:ascii:]]
-    pass("\\p{Blank}", " ")     // [[:blank:]]
-    pass("\\p{Cntrl}", "\\x20") // [[:cntrl:]]
-    pass("\\p{Digit}", "1")     // [[:digit:]]
-    pass("\\p{Graph}", "a")     // [[:graph:]]
-    pass("\\p{Lower}", "a")     // [[:lower:]]
-    pass("\\p{Print}", "a")     // [[:print:]]
-    pass("\\p{Punct}", ".")     // [[:punct:]]
-    pass("\\p{Space}", " ")     // [[:space:]]
-    pass("\\p{Upper}", "A")     // [[:upper:]]
-    pass("\\p{XDigit}", "a")    // [[:xdigit:]]
+  test("POSIX character classes") {
+    pass("\\p{Alnum}", "a")
+    pass("\\p{Alpha}", "a")
+    pass("\\p{ASCII}", "a")
+    pass("\\p{Blank}", " ")
+    pass("\\p{Digit}", "1")
+    pass("\\p{Graph}", "a")
+    pass("\\p{Lower}", "a")
+    pass("\\p{Print}", "a")
+    pass("\\p{Punct}", ".")
+    pass("\\p{Space}", " ")
+    pass("\\p{Upper}", "A")
+    pass("\\p{XDigit}", "a")
+    pass("\\p{Cntrl}", new String(Array[Byte](0x7F)))
   }
 
   test("unicode classes") {
+    // Categories
     pass("\\p{Lu}", "A")
     pass("\\p{Sc}", "$")
+
+    // Blocks
+    pass("\\p{InGreek}", "α")
+
+    // Scripts
+    pass("\\p{IsLatin}", "a")
+    fail("\\p{IsLatin}", "α")
   }
 
-  ignore("(not supported) unicode classes") {
-    // Needs to convert to
-    pass("\\p{InGreek}", "α") // p{Latin}
-    pass("\\p{IsLatin}", "a") // p{Greek}
-    fail("\\p{IsLatin}", "α")
+  ignore("pending") {
+    // The prefix In should only allow blokcs like Mongolian
+    assertThrowsAnd[PatternSyntaxException](Pattern.compile("\\p{InLatin}"))(
+      _.getMessage == "Unknown character block name {Latin} near index 10"
+    )
 
-    // not supported
+    // Binary Properties
     pass("\\p{IsAlphabetic}", "a")
     fail("\\p{IsAlphabetic}", "-")
   }
@@ -404,15 +412,17 @@ class PatternSuite() extends FunSuite {
     )
   }
 
-  private def pass(pattern: String, input: String): Unit =
+  private def pass(pattern: String, input: String)(
+      implicit pos: Position): Unit =
     matches(pattern, input, pass = true)
 
-  private def fail(pattern: String, input: String): Unit =
+  private def fail(pattern: String, input: String)(
+      implicit pos: Position): Unit =
     matches(pattern, input, pass = false)
 
   private def passAndFail(pattern: String,
                           passInput: String,
-                          failInput: String): Unit = {
+                          failInput: String)(implicit pos: Position): Unit = {
     pass(pattern, passInput)
     fail(pattern, failInput)
   }
@@ -421,7 +431,7 @@ class PatternSuite() extends FunSuite {
                           ret: Boolean,
                           mid: String,
                           pattern: String,
-                          input: String): Unit = {
+                          input: String)(implicit pos: Position): Unit = {
     val ret0 =
       if (pass) ret
       else !ret
@@ -429,7 +439,8 @@ class PatternSuite() extends FunSuite {
     assert(ret0)
   }
 
-  private def matches(pattern: String, input: String, pass: Boolean): Unit = {
+  private def matches(pattern: String, input: String, pass: Boolean)(
+      implicit pos: Position): Unit = {
 
     val ret = Pattern.matches(pattern, input)
 
@@ -440,9 +451,8 @@ class PatternSuite() extends FunSuite {
     assertRegex(pass, ret, mid, pattern, input)
   }
 
-  private def find(pattern: String,
-                   input: String,
-                   pass: Boolean = true): Unit = {
+  private def find(pattern: String, input: String, pass: Boolean = true)(
+      implicit pos: Position): Unit = {
     val ret = Pattern.compile(pattern).matcher(input).find()
 
     val mid =
