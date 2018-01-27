@@ -138,9 +138,18 @@ final class Matcher private (private val _pattern: Pattern) {
     _groups(2 * group + 1)
   }
 
-  def start(name: String): Int              = ???
-  def end(name: String): Int                = ???
-  def group(name: String): String           = ???
+  def start(name: String): Int    = start(groupIndex(name))
+  def end(name: String): Int      = end(groupIndex(name))
+  def group(name: String): String = group(groupIndex(name))
+
+  private def groupIndex(name: String): Int = {
+    val pos = _pattern.re2.findNamedCapturingGroups(name)
+    if (pos == -1) {
+      throw new IllegalArgumentException(s"No group with name <$name>")
+    }
+    pos
+  }
+
   def region(start: Int, end: Int): Matcher = ???
 
   /**
@@ -314,6 +323,7 @@ final class Matcher private (private val _pattern: Pattern) {
    * @return the {@code Matcher} itself, for chained method calls
    * @throws IllegalStateException if there was no most recent match
    * @throws IndexOutOfBoundsException if replacement refers to an invalid group
+   * @throws IllegalArgumentException if replacement has unclosed named group
    */
   def appendReplacement(sb: StringBuffer, replacement: String): Matcher = {
     val s = start()
@@ -359,6 +369,24 @@ final class Matcher private (private val _pattern: Pattern) {
           }
           last = i
           i -= 1
+        } else if (c == '{') {
+          if (last < i) {
+            sb.append(replacement.substring(last, i))
+          }
+          i += 1 // '{'
+          var j = i + 1
+          while (j < replacement.length && replacement.charAt(j) != '}' && replacement
+                   .charAt(j) != ' ') {
+            j += 1
+          }
+          if (j == replacement.length || replacement.charAt(j) == ' ') {
+            throw new IllegalArgumentException(
+              "named capturing group is missing trailing '}'")
+          }
+          val groupName = replacement.substring(i + 1, j)
+          sb.append(this.group(groupName))
+          i += 1 // '}'
+          last = j + 1
         }
       }
       i += 1

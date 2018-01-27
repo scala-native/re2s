@@ -44,8 +44,9 @@ class RE2 private extends Serializable {
   var prog: Prog   = _ // compiled program
   var cond: Int    = _ // EMPTY_* bitmask: empty-width conditions
   // required at start of match
-  var numSubexp: Int   = _
-  var longest: Boolean = _
+  var numSubexp: Int              = _
+  var longest: Boolean            = _
+  var namedCaps: Map[String, Int] = _
 
   var prefix: String          = _ // required UTF-16 prefix in unanchored matches
   var prefixUTF8: Array[Byte] = _ // required UTF-8 prefix in unanchored matches
@@ -66,19 +67,25 @@ class RE2 private extends Serializable {
     this.cond = re2.cond
     this.numSubexp = re2.numSubexp
     this.longest = re2.longest
+    this.namedCaps = re2.namedCaps
     this.prefix = re2.prefix
     this.prefixUTF8 = re2.prefixUTF8
     this.prefixComplete = re2.prefixComplete
     this.prefixRune = re2.prefixRune
   }
 
-  def this(expr: String, prog: Prog, numSubexp: Int, longest: Boolean) {
+  def this(expr: String,
+           prog: Prog,
+           numSubexp: Int,
+           longest: Boolean,
+           namedCaps: Map[String, Int]) {
     this()
     this.expr = expr
     this.prog = prog
     this.numSubexp = numSubexp
     this.cond = prog.startCond()
     this.longest = longest
+    this.namedCaps = namedCaps
   }
 
   /**
@@ -86,6 +93,13 @@ class RE2 private extends Serializable {
    * expression.
    */
   def numberOfCapturingGroups(): Int = numSubexp
+
+  /**
+   * Returns the index of the named group
+   *
+   */
+  def findNamedCapturingGroups(name: String): Int =
+    namedCaps.getOrElse(name, -1)
 
   // get() returns a machine to use for matching |this|.  It uses |this|'s
   // machine cache if possible, to avoid unnecessary allocation.
@@ -719,7 +733,7 @@ object RE2 {
   //     U - NonGreedy
   //   line ends: \A \z
   //   \Q and \E to disable/enable metacharacters
-  //   (?P<name>expr) for named captures
+  //   (?<name>expr) for named captures
   // \C (any byte) is not supported.
   final val PERL_X = 0x40
 
@@ -783,11 +797,12 @@ object RE2 {
 
   // Exposed to ExecTests.
   def compileImpl(expr: String, mode: Int, longest: Boolean): RE2 = {
-    var re     = Parser.parse(expr, mode)
-    val maxCap = re.maxCap() // (may shrink during simplify)
+    var re        = Parser.parse(expr, mode)
+    val maxCap    = re.maxCap() // (may shrink during simplify)
+    val namedCaps = re.namedCaps
     re = Simplify.simplify(re)
     val prog          = Compiler.compileRegexp(re)
-    val re2           = new RE2(expr, prog, maxCap, longest)
+    val re2           = new RE2(expr, prog, maxCap, longest, namedCaps)
     val prefixBuilder = new java.lang.StringBuilder()
     re2.prefixComplete = prog.prefix(prefixBuilder)
     re2.prefix = prefixBuilder.toString()

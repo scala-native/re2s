@@ -851,31 +851,16 @@ class Parser(wholeRegexp: String, _flags: Int) {
   private def parsePerlFlags(t: StringIterator): Unit = {
     val startPos = t.pos()
 
-    // Check for named captures, first introduced in Python's regexp library.
-    // As usual, there are three slightly different syntaxes:
-    //
-    //   (?P<name>expr)   the original, introduced by Python
-    //   (?<name>expr)    the .NET alteration, adopted by Perl 5.10
-    //   (?'name'expr)    another .NET alteration, adopted by Perl 5.10
-    //
-    // Perl 5.10 gave in and implemented the Python version too,
-    // but they claim that the last two are the preferred forms.
-    // PCRE and languages based on it (specifically, PHP and Ruby)
-    // support all three as well.  EcmaScript 4 uses only the Python form.
-    //
-    // In both the open source world (via Code Search) and the
-    // Google source tree, (?P<expr>name) is the dominant form,
-    // so that's the one we implement.  One is enough.
     val s = t.rest()
-    if (s.startsWith("(?P<")) {
+    if (s.startsWith("(?<")) {
       // Pull out name.
       val end = s.indexOf('>')
       if (end < 0) {
         throw new PatternSyntaxException(ERR_INVALID_NAMED_CAPTURE, s)
       }
-      val name = s.substring(4, end) // "name"
+      val name = s.substring(3, end) // "name"
       t.skipString(name)
-      t.skip(5) // "(?P<>"
+      t.skip(4) // "(?<>"
       if (!isValidCaptureName(name)) {
         throw new PatternSyntaxException(ERR_INVALID_NAMED_CAPTURE,
                                          s.substring(0, end)) // "(?P<name>"

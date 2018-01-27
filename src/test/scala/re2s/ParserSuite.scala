@@ -205,7 +205,7 @@ class ParserSuite() extends FunSuite {
     Array("(?-m)\\A", "bot{}"),
     Array("(?-m)\\z", "eot{\\z}"),
     // Test named captures
-    Array("(?P<name>a)", "cap{name:lit{a}}"),
+    Array("(?<name>a)", "cap{name:lit{a}}"),
     // Case-folded literals
     Array("[Aa]", "litfold{A}"),
     Array("[\\x{100}\\x{101}]", "litfold{Ā}"),
@@ -405,8 +405,8 @@ class ParserSuite() extends FunSuite {
     }
     re.runes = new Array[Int](runes.size)
     var j = 0
-    import scala.collection.JavaConversions._
-    for (i <- runes) {
+    import scala.collection.JavaConverters._
+    for (i <- runes.asScala) {
       re.runes(j) = i
       j += 1
     }
@@ -451,11 +451,11 @@ class ParserSuite() extends FunSuite {
     // "[\xff]",
     // "[\\\xff]",
     // "\\\xff",
-    "(?P<name>a",
-    "(?P<name>",
-    "(?P<name",
-    "(?P<x y>a)",
-    "(?P<>a)",
+    "(?<name>a",
+    "(?<name>",
+    "(?<name",
+    "(?<x y>a)",
+    "(?<>a)",
     "[a-Z]",
     "(?i)[a-Z]",
     "a{100000}",
@@ -470,7 +470,7 @@ class ParserSuite() extends FunSuite {
                                 "\\Q\\\\\\\\E",
                                 "\\Q\\\\\\\\\\E",
                                 "(?:a)",
-                                "(?P<name>a)")
+                                "(?<name>a)")
 
   private val ONLY_POSIX =
     Array("a++", "a**", "a?*", "a+*", "a{1}*", ".{1}{2}.{3}")

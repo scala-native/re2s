@@ -22,4 +22,7 @@ object TestUtils {
     }
     throw new Exception("fail")
   }
+
+  def matcher(regex: String, text: String): Matcher =
+    Pattern.compile(regex).matcher(text)
 }
